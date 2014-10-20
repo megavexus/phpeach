@@ -69,8 +69,7 @@ function running_tests() {
 
     echo -e "\nRunning tests..."
 
-    if [ $DEBUG ]; then echo "phpunit --bootstrap vendor/autoload.php Tests"; fi
-    if ! phpunit --bootstrap vendor/autoload.php Tests; then
+    if ! phpunit --bootstrap ${CHECKPHP_PHPUNIT_BOOTSTRAP} ${CHECKPHP_PHPUNIT_EXTENDS} ${CHECKPHP_PHPUNIT_TESTPATH}; then
         SUCCESS=1
     fi
 
@@ -85,7 +84,7 @@ echo -e "\n-=[ Code Quality Review ]=-\n"
 check_style
 check_psr
 check_mess_code
-#running_tests
+running_tests
 
 IS_OK=$?
 
