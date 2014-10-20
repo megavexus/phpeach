@@ -27,7 +27,7 @@ function check_style() {
     echo -e "\nChecking code to fix..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if ! php-cs-fixer --dry-run --verbose --diff fix $PHP_SCRIPT --fixers=${CHECKPHP_CS_FIXERS}; then
+        if ! php-cs-fixer --dry-run --verbose --diff fix $PHP_SCRIPT --fixers=${CHECKPHP_CODE_FIXERS}; then
             SUCCESS=1
         fi
     done
@@ -41,8 +41,8 @@ function check_psr() {
     echo -e "\nChecking code style..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if [ $DEBUG ]; then echo "phpcs --standard=PSR2 $PHP_SCRIPT"; fi
-        if ! phpcs --standard=PSR2 $PHP_SCRIPT; then
+        if [ $DEBUG ]; then echo ""; fi
+        if ! phpcs --standard=${CHECKPHP_CODE_STANDARD} $PHP_SCRIPT; then
             SUCCESS=1
         fi
     done
@@ -84,7 +84,7 @@ echo -e "\n-=[ Code Quality Review ]=-\n"
 
 #check_syntax
 check_style
-#check_psr
+check_psr
 #check_mess_code
 #running_tests
 
