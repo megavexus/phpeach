@@ -1,0 +1,30 @@
+{
+    "name": "oxkhar/phpeach",
+    "description": "Test & Quality tools",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Oscar Vítores",
+            "email": "hi@oxkhar.com"
+        }
+    ],
+    "require-dev": {
+        "phing/phing": "~2.8",
+
+        "phpunit/phpunit": "~4.1",
+        "phpspec/phpspec": "~2.0",
+        "henrikbjorn/phpspec-code-coverage": "*",
+
+        "squizlabs/php_codesniffer": "*",
+        "fabpot/php-cs-fixer": "*",
+
+        "phploc/phploc": "*",
+        "pdepend/pdepend": "*",
+        "phpmd/phpmd": "*",
+        "sebastian/phpcpd": "*",
+
+        "theseer/phpdox": "*",
+        "apigen/apigen": "*",
+        "nette/nette": "~2.2"
+    }
+}
