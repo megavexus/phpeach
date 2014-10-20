@@ -56,8 +56,7 @@ function check_mess_code() {
     echo -e "\nChecking code mess..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if [ $DEBUG ]; then echo "phpmd $PHP_SCRIPT text controversial"; fi
-        if ! phpmd $PHP_SCRIPT text controversial; then
+        if ! phpmd $PHP_SCRIPT text ${CHECKPHP_MESS_RULESET} | grep -v "^$"; then
             SUCCESS=1
         fi
     done
@@ -85,7 +84,7 @@ echo -e "\n-=[ Code Quality Review ]=-\n"
 #check_syntax
 check_style
 check_psr
-#check_mess_code
+check_mess_code
 #running_tests
 
 IS_OK=$?
