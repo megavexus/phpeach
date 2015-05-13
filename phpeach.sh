@@ -4,7 +4,7 @@ PATH_PWD=$(pwd)
 SCRIPT_PATH=$(cd $(dirname $0); pwd)
 SCRIPT_NAME=$(basename $0)
 
-. ${SCRIPT_PATH}/check-php.conf
+. ${SCRIPT_PATH}/phpeach.conf
 
 CHECK_ACTIVE['syntax']=1
 CHECK_ACTIVE['cs-fix']=1
