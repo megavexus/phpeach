@@ -39,7 +39,7 @@ if check_is_ok && check_is_active cs-fix; then
     echo -e "\nChecking code to fix..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if ! php-cs-fixer --dry-run --verbose --diff fix $PHP_SCRIPT --fixers=${CHECKPHP_CODE_FIXERS}; then
+        if ! php-cs-fixer --dry-run --verbose --diff fix $PHP_SCRIPT --fixers=${PHPEACH_CODE_FIXERS}; then
             STATUS_CODE=2
             check_failed
         fi
@@ -50,7 +50,7 @@ if check_is_ok && check_is_active psr; then
     echo -e "\nChecking code style..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if ! phpcs --standard=${CHECKPHP_CODE_STANDARD} $PHP_SCRIPT; then
+        if ! phpcs --standard=${PHPEACH_CODE_STANDARD} $PHP_SCRIPT; then
             STATUS_CODE=4
             check_failed
         fi
@@ -61,7 +61,7 @@ if check_is_ok && check_is_active mess-code; then
     echo -e "\nChecking code mess..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if ! phpmd $PHP_SCRIPT text ${CHECKPHP_MESS_RULESET} | grep -v "^$"; then
+        if ! phpmd $PHP_SCRIPT text ${PHPEACH_MESS_RULESET} | grep -v "^$"; then
             STATUS_CODE=8
             check_failed
         fi
@@ -72,7 +72,7 @@ if check_is_ok && check_is_active tests; then
 
     echo -e "\nRunning tests..."
 
-    if ! phpunit --bootstrap ${CHECKPHP_PHPUNIT_BOOTSTRAP} ${CHECKPHP_PHPUNIT_EXTENDS} ${CHECKPHP_PHPUNIT_TESTPATH}; then
+    if ! phpunit --bootstrap ${PHPEACH_PHPUNIT_BOOTSTRAP} ${PHPEACH_PHPUNIT_EXTENDS} ${PHPEACH_PHPUNIT_TESTPATH}; then
         STATUS_CODE=16
         check_failed
     fi
