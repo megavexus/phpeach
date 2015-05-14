@@ -55,10 +55,12 @@ if check_is_ok && check_is_active cs-fix; then
     echo -e "\nChecking code to fix..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if ! ${PHPEACH_TOOLS_PATH}php-cs-fixer --dry-run --verbose --diff fix $PHP_SCRIPT --fixers=${PHPEACH_CODE_FIXERS}; then
+        if ! ${PHPEACH_TOOLS_PATH}php-cs-fixer fix --dry-run --diff --fixers=${PHPEACH_CODE_FIXERS} $PHP_SCRIPT; then
             STATUS_CODE=2
             check_failed
-        fi
+        else
+            echo $PHP_SCRIPT...Ok
+        fi | grep -iv "fixed all files"
     done
 fi
 
@@ -67,7 +69,7 @@ if check_is_ok && check_is_active psr; then
     echo -e "\nChecking code style..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if ! ${PHPEACH_TOOLS_PATH}phpcs --standard=${PHPEACH_CODE_STANDARD} $PHP_SCRIPT; then
+        if ! ${PHPEACH_TOOLS_PATH}phpcs --colors -n --standard=${PHPEACH_CODE_STANDARD} $PHP_SCRIPT; then
             STATUS_CODE=4
             check_failed
         fi
