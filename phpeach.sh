@@ -81,10 +81,10 @@ if check_is_ok && check_is_active mess-code; then
     echo -e "\nChecking code mess..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if ! ${PHPEACH_TOOLS_PATH}phpmd $PHP_SCRIPT text ${PHPEACH_MESS_RULESET} | grep -v "^$"; then
+        if ! ${PHPEACH_TOOLS_PATH}phpmd $PHP_SCRIPT text ${PHPEACH_MESS_RULESET}; then
             STATUS_CODE=8
             check_failed
-        fi
+        fi  | grep -v "^$"
     done
 fi
 
