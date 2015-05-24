@@ -1,0 +1,5 @@
+phpqa.build.path=build
+vendors.path=vendor
+;phpqa.tools=
+phpqa.sources=Command,Descriptor,Event,Helper,Input
+phpqa.prefix.path=../src
