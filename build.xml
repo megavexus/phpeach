@@ -33,32 +33,33 @@
     <property name="vendors.path" value="vendor" />
     <property name="phpqa.tools.path" value="${vendors.path}/bin" />
     <property name="phpqa.build.path" value="build" />
-    <property name="phpqa.prefix.path" value="." />
-    <property name="phpqa.sources" value="src" />
+    <property name="phpqa.source.path" value="src" />
+    <property name="phpqa.source.list" value="" />
 
     <!-- create paths -->
-    <php function="str_replace" returnProperty="phpqa.sources">
+    <php function="str_replace" returnProperty="phpqa.source">
       <param value=" " />
       <param value="" />
-      <param value="${phpqa.sources}" />
+      <param value="${phpqa.source.list}" />
     </php>
-    <php function="str_replace" returnProperty="phpqa.sources">
+    <php function="str_replace" returnProperty="phpqa.source">
       <param value="," />
-      <param value=" ${phpqa.prefix.path}/" />
-      <param value="${phpqa.sources}" />
+      <param value=" ${phpqa.source.path}/" />
+      <param value="${phpqa.source}" />
     </php>
-    <property name="phpqa.sources" value="${phpqa.prefix.path}/${phpqa.sources}" override="true" />
-    <php function="str_replace" returnProperty="phpqa.sources.list">
+    <property name="phpqa.source" value="${phpqa.source.path}/${phpqa.source}" override="true" />
+
+    <php function="str_replace" returnProperty="phpqa.source.list">
       <param value=" "/>
       <param value=","/>
-      <param value="${phpqa.sources}"/>
+      <param value="${phpqa.source}"/>
     </php>
   </target>
 
   <!-- Check sintax error -->
   <target name="qa:check:lint" depends="qa:main:config"
       description="Perform syntax check of sourcecode files">
-    <foreach list="${phpqa.sources}" param="lint.path" target="lint-path" delimiter=" " />
+    <foreach list="${phpqa.source}" param="lint.path" target="lint-path" delimiter=" " />
   </target>
 
   <target name="lint-path" hidden="true" >
@@ -78,7 +79,7 @@
     <property name="command" value='${command} --count-tests' override="true" />
     <property name="command" value='${command} --log-csv ${phpqa.build.path}/logs/phploc.csv' override="true" />
     <property name="command" value='${command} --log-xml ${phpqa.build.path}/logs/phploc.xml' override="true" />
-    <property name="command" value='${command} ${phpqa.sources}' override="true" />
+    <property name="command" value='${command} ${phpqa.source}' override="true" />
 
     <exec command='${command}' passthru="true" />
   </target>
@@ -86,7 +87,7 @@
   <target name="qa:check:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
-    <property name="command" value='${command} ${phpqa.sources.list}' override="true" />
+    <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} text' override="true" />
     <property name="command" value='${command} phpmd.xml' override="true" />
 
@@ -96,7 +97,7 @@
   <target name="qa:ci:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD creating a log file for the continuous integration server">
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
-    <property name="command" value='${command} ${phpqa.sources.list}' override="true" />
+    <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} xml' override="true" />
     <property name="command" value='${command} phpmd.xml' override="true" />
     <property name="command" value='${command} --reportfile ${phpqa.build.path}/logs/pmd.xml' override="true" />
@@ -110,7 +111,7 @@
     <property name="command" value='${phpqa.tools.path}/phpcs' override="true" />
     <property name="command" value='${command} --extensions=php' override="true" />
     <property name="command" value='${command} --standard=phpcs.xml' override="true" />
-    <property name="command" value='${command} ${phpqa.sources}' override="true" />
+    <property name="command" value='${command} ${phpqa.source}' override="true" />
 
     <exec command='${command}' passthru="true" />
 
@@ -123,7 +124,7 @@
     <property name="command" value='${command} --standard=phpcs.xml' override="true" />
     <property name="command" value='${command} --report=checkstyle' override="true" />
     <property name="command" value='${command} --report-file=${phpqa.build.path}/logs/checkstyle.xml' override="true" />
-    <property name="command" value='${command} ${phpqa.sources}' override="true" />
+    <property name="command" value='${command} ${phpqa.source}' override="true" />
 
     <exec command='${command}'  output="/dev/null" />
 
@@ -133,7 +134,7 @@
       description="Find duplicate code using PHPCPD">
     <property name="command" value='${phpqa.tools.path}/phpcpd' override="true" />
     <property name="command" value='${command} --log-pmd ${phpqa.build.path}/logs/pmd-cpd.xml' override="true" />
-    <property name="command" value='${command} ${phpqa.sources}' override="true" />
+    <property name="command" value='${command} ${phpqa.source}' override="true" />
 
     <exec command='${command}' passthru="true" />
 
@@ -145,7 +146,7 @@
     <property name="command" value='${command} --jdepend-xml=${phpqa.build.path}/logs/jdepend.xml' override="true" />
     <property name="command" value='${command} --jdepend-chart=${phpqa.build.path}/pdepend/dependencies.svg' override="true" />
     <property name="command" value='${command} --overview-pyramid=${phpqa.build.path}/pdepend/overview-pyramid.svg' override="true" />
-    <property name="command" value='${command} ${phpqa.sources.list}' override="true" />
+    <property name="command" value='${command} ${phpqa.source.list}' override="true" />
 
     <exec command='${command}' />
 
@@ -193,7 +194,7 @@
   <target name="qa:doc:apigen" depends="qa:main:config"
       description="Generate API documentation using ApiGen">
     <property name="command" value='${phpqa.tools.path}/apigen generate' override="true" />
-    <property name="command" value='${command} --source=${phpqa.sources.list}' override="true" />
+    <property name="command" value='${command} --source=${phpqa.source.list}' override="true" />
     <property name="command" value='${command} --destination=${phpqa.build.path}/api' override="true" />
     <property name="command" value='${command} --title="API Doc"' override="true" />
     <property name="command" value='${command} --tree --todo --quiet' override="true" />
