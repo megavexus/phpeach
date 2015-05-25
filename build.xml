@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="QA artifacts builder" default="build">
+<project name="QA artifacts builder" default="qa:build">
+  <property file="build.ini" />
+  <property file="build.ini.dist" />
 
-  <target name="build" depends="prepare,phploc,pdepend,ci:phpmd,ci:phpcs,phpcpd,apigen,ci:phpspec,phpdox" />
+  <target name="qa:build" description="Main build quality data and info for CI tools"
+      depends="qa:main:prepare,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:doc:apigen,qa:ci:phpspec,qa:doc:phpdox" />
 
-  <target name="check" depends="config,lint,phploc,phpcs,phpmd,phpcpd,phpspec" />
+  <target name="qa:check" description="Pass main tools to verify quality of code"
+      depends="qa:main:config,qa:check:lint,qa:check:phploc,qa:check:phpcs,qa:check:phpmd,qa:check:phpcpd,qa:tests:phpspec" />
 
-  <target name="clean" description="Cleanup build artifacts">
+  <target name="qa:main:clean" description="Cleanup build artifacts">
     <delete dir="${phpqa.build.path}/api" />
     <delete dir="${phpqa.build.path}/doc" />
     <delete dir="${phpqa.build.path}/coverage" />
@@ -14,7 +18,8 @@
     <delete dir="${phpqa.build.path}/pdepend" />
   </target>
 
-  <target name="prepare" depends="config,clean" description="Prepare for build">
+  <target name="qa:main:prepare" description="Prepare for build"
+      depends="qa:main:config,qa:main:clean" >
     <mkdir dir="${phpqa.build.path}/api" />
     <mkdir dir="${phpqa.build.path}/doc" />
     <mkdir dir="${phpqa.build.path}/coverage" />
@@ -23,19 +28,18 @@
     <mkdir dir="${phpqa.build.path}/phpdox" />
   </target>
 
-  <target name="config" hidden="true">
-    <property file="build.ini" />
-    <property file="build.ini.dist" />
-
+  <target name="qa:main:config" hidden="true">
     <!-- defaults -->
+    <property name="vendors.path" value="vendor" />
     <property name="phpqa.tools.path" value="${vendors.path}/bin" />
     <property name="phpqa.build.path" value="build" />
+    <property name="phpqa.prefix.path" value="." />
     <property name="phpqa.sources" value="src" />
 
-    <!-- Montando rutas -->
+    <!-- create paths -->
     <php function="str_replace" returnProperty="phpqa.sources">
-      <param value=" " /> 
-      <param value="" /> 
+      <param value=" " />
+      <param value="" />
       <param value="${phpqa.sources}" />
     </php>
     <php function="str_replace" returnProperty="phpqa.sources">
@@ -52,21 +56,24 @@
   </target>
 
   <!-- Check sintax error -->
-  <target name="lint" depends="config" description="Perform syntax check of sourcecode files">
+  <target name="qa:check:lint" depends="qa:main:config"
+      description="Perform syntax check of sourcecode files">
     <foreach list="${phpqa.sources}" param="lint.path" target="lint-path" delimiter=" " />
   </target>
 
   <target name="lint-path" hidden="true" >
+    <echo>Checking ${lint.path}</echo>
     <apply executable="php" checkreturn="true">
       <arg value="-l" />
       <fileset dir="${lint.path}">
         <include name="**/*.php" />
-        <!-- exclude name="**/path/to/exclude/**" /-->
+        <!-- exclude name="**/path/to/exclude/**" / -->
       </fileset>
     </apply>
   </target>
 
-  <target name="phploc" depends="config" description="Measure project size using PHPLOC">
+  <target name="qa:check:phploc" depends="qa:main:config"
+      description="Measure project size using PHPLOC">
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
     <property name="command" value='${command} --count-tests' override="true" />
     <property name="command" value='${command} --log-csv ${phpqa.build.path}/logs/phploc.csv' override="true" />
@@ -76,8 +83,8 @@
     <exec command='${command}' passthru="true" />
   </target>
 
-  <target name="phpmd" depends="config"
-          description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
+  <target name="qa:check:phpmd" depends="qa:main:config"
+      description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
     <property name="command" value='${command} ${phpqa.sources.list}' override="true" />
     <property name="command" value='${command} text' override="true" />
@@ -86,8 +93,8 @@
     <exec command='${command}' passthru="true" />
   </target>
 
-  <target name="ci:phpmd" depends="config"
-          description="Perform project mess detection using PHPMD creating a log file for the continuous integration server">
+  <target name="qa:ci:phpmd" depends="qa:main:config"
+      description="Perform project mess detection using PHPMD creating a log file for the continuous integration server">
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
     <property name="command" value='${command} ${phpqa.sources.list}' override="true" />
     <property name="command" value='${command} xml' override="true" />
@@ -98,8 +105,8 @@
 
   </target>
 
-  <target name="phpcs" depends="config"
-          description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
+  <target name="qa:check:phpcs" depends="qa:main:config"
+      description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
     <property name="command" value='${phpqa.tools.path}/phpcs' override="true" />
     <property name="command" value='${command} --extensions=php' override="true" />
     <property name="command" value='${command} --standard=phpcs.xml' override="true" />
@@ -109,8 +116,8 @@
 
   </target>
 
-  <target name="ci:phpcs" depends="config"
-          description="Find coding standard violations using PHP_CodeSniffer creating a log file for the continuous integration server">
+  <target name="qa:ci:phpcs" depends="qa:main:config"
+      description="Find coding standard violations using PHP_CodeSniffer creating a log file for the continuous integration server">
     <property name="command" value='${phpqa.tools.path}/phpcs' override="true" />
     <property name="command" value='${command} --extensions=php' override="true" />
     <property name="command" value='${command} --standard=phpcs.xml' override="true" />
@@ -122,8 +129,8 @@
 
   </target>
 
-  <target name="phpcpd" depends="config"
-          description="Find duplicate code using PHPCPD">
+  <target name="qa:check:phpcpd" depends="qa:main:config"
+      description="Find duplicate code using PHPCPD">
     <property name="command" value='${phpqa.tools.path}/phpcpd' override="true" />
     <property name="command" value='${command} --log-pmd ${phpqa.build.path}/logs/pmd-cpd.xml' override="true" />
     <property name="command" value='${command} ${phpqa.sources}' override="true" />
@@ -132,7 +139,8 @@
 
   </target>
 
-  <target name="pdepend" depends="config" description="Calculate software metrics using PHP_Depend">
+  <target name="qa:check:pdepend" depends="qa:main:config"
+      description="Calculate software metrics using PHP_Depend">
     <property name="command" value='${phpqa.tools.path}/pdepend' override="true" />
     <property name="command" value='${command} --jdepend-xml=${phpqa.build.path}/logs/jdepend.xml' override="true" />
     <property name="command" value='${command} --jdepend-chart=${phpqa.build.path}/pdepend/dependencies.svg' override="true" />
@@ -143,16 +151,18 @@
 
   </target>
 
-  <target name="phpdox" depends="config"
-          description="Generate API documentation using phpDox">
+  <target name="qa:doc:phpdox" depends="qa:main:config"
+      description="Generate API documentation using phpDox">
     <exec executable='${phpqa.tools.path}/phpdox' passthru="true" />
   </target>
 
-  <target name="phpunit" depends="config" description="Run unit tests with PHPUnit">
+  <target name="qa:tests:phpunit" depends="qa:main:config"
+      description="Run unit tests with PHPUnit">
     <exec executable='${phpqa.tools.path}/phpunit' passthru="true" />
   </target>
 
-  <target name="phpspec" depends="config" description="Run tests with PHPSpec">
+  <target name="qa:tests:phpspec" depends="qa:main:config"
+      description="Run tests with PHPSpec">
     <property name="command" value='${phpqa.tools.path}/phpspec' override="true" />
     <property name="command" value='${command} run' override="true" />
     <property name="command" value='${command} --no-interaction' override="true" />
@@ -161,7 +171,8 @@
 
   </target>
 
-  <target name="ci:phpspec" depends="config" description="Run tests with PHPSpec">
+  <target name="qa:ci:phpspec" depends="qa:main:config"
+      description="Run tests with PHPSpec">
     <property name="command" value='${phpqa.tools.path}/phpspec' override="true" />
     <property name="command" value='${command} run' override="true" />
     <property name="command" value='${command} --format=junit' override="true" />
@@ -179,13 +190,13 @@
     </reflexive>
   </target>
 
-  <target name="apigen" depends="config" description="Generate API documentation using ApiGen">
+  <target name="qa:doc:apigen" depends="qa:main:config"
+      description="Generate API documentation using ApiGen">
     <property name="command" value='${phpqa.tools.path}/apigen generate' override="true" />
-    <property name="command" value='${command} --source ${phpqa.sources.list}' override="true" />
-    <property name="command" value='${command} --destination ${phpqa.build.path}/api' override="true" />
-    <property name="command" value='${command} --title "API Doc"' override="true" />
-    <property name="command" value='${command} --progressbar no' override="true" />
-    <!-- property name="command" value='${command} __exclude */Lib/Kaltura/*' override="true" / -->
+    <property name="command" value='${command} --source=${phpqa.sources.list}' override="true" />
+    <property name="command" value='${command} --destination=${phpqa.build.path}/api' override="true" />
+    <property name="command" value='${command} --title="API Doc"' override="true" />
+    <property name="command" value='${command} --tree --todo --quiet' override="true" />
     <!-- property name="command" value='${command} __exclude */Resources/*' override="true" / -->
 
     <exec command='${command}' passthru="true" />
