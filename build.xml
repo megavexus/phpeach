@@ -77,6 +77,15 @@
       description="Measure project size using PHPLOC">
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
     <property name="command" value='${command} --count-tests' override="true" />
+    <property name="command" value='${command} ${phpqa.source}' override="true" />
+
+    <exec command='${command}' passthru="true" />
+  </target>
+
+  <target name="qa:ci:phploc" depends="qa:main:config"
+      description="Measure project size using PHPLOC">
+    <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
+    <property name="command" value='${command} --count-tests' override="true" />
     <property name="command" value='${command} --log-csv ${phpqa.build.path}/logs/phploc.csv' override="true" />
     <property name="command" value='${command} --log-xml ${phpqa.build.path}/logs/phploc.xml' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
@@ -89,7 +98,7 @@
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} text' override="true" />
-    <property name="command" value='${command} phpmd.xml' override="true" />
+    <property name="command" value='${command} ${phpqa.phpmd.ruleset}' override="true" />
 
     <exec command='${command}' passthru="true" />
   </target>
@@ -99,7 +108,7 @@
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} xml' override="true" />
-    <property name="command" value='${command} phpmd.xml' override="true" />
+    <property name="command" value='${command} ${phpqa.phpmd.ruleset}' override="true" />
     <property name="command" value='${command} --reportfile ${phpqa.build.path}/logs/pmd.xml' override="true" />
 
     <exec command='${command}' />

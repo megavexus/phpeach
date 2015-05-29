@@ -2,3 +2,6 @@
 phpqa.build.path=build
 phpqa.source.path=../src
 phpqa.source.list=Command,Descriptor,Event,Helper,Input
+
+
+phpqa.phpmd.ruleset=cleancode,codesize,controversial,design,naming,unusedcode
