@@ -187,8 +187,8 @@
   <target name="qa:check:phpcs" depends="qa:main:config"
       description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
     <property name="command" value='${phpqa.tools.path}/phpcs' override="true" />
-    <property name="command" value='${command} --extensions=php' override="true" />
-    <property name="command" value='${command} --standard=phpcs.xml' override="true" />
+    <property name="command" value='${command} --extensions=${phpqa.phpcs.extensions}' override="true" />
+    <property name="command" value='${command} --standard=${phpqa.phpcs.standard}' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
 
     <exec command='${command}' passthru="true" />
@@ -198,8 +198,8 @@
   <target name="qa:ci:phpcs" depends="qa:main:config"
       description="Find coding standard violations using PHP_CodeSniffer creating a log file for the continuous integration server">
     <property name="command" value='${phpqa.tools.path}/phpcs' override="true" />
-    <property name="command" value='${command} --extensions=php' override="true" />
-    <property name="command" value='${command} --standard=phpcs.xml' override="true" />
+    <property name="command" value='${command} --extensions=${phpqa.phpcs.extensions}' override="true" />
+    <property name="command" value='${command} --standard=${phpqa.phpcs.standard}' override="true" />
     <property name="command" value='${command} --report=checkstyle' override="true" />
     <property name="command" value='${command} --report-file=${phpqa.build.path}/logs/checkstyle.xml' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
@@ -211,6 +211,9 @@
   <target name="qa:check:phpcpd" depends="qa:main:config"
       description="Find duplicate code using PHPCPD">
     <property name="command" value='${phpqa.tools.path}/phpcpd' override="true" />
+    <!-- property name="command" value='${command} __names ${phpqa.include.path}' override="true" />
+    <property name="command" value='${command} __names-exclude ${phpqa.exclude.path}' override="true" />
+    <property name="command" value='${command} __exclude ${phpqa.exclude.path}' override="true" /-->
     <property name="command" value='${command} --log-pmd ${phpqa.build.path}/logs/pmd-cpd.xml' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
 
