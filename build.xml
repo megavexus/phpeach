@@ -67,11 +67,23 @@
 
   <target name="lint-path" hidden="true" >
     <echo>Checking ${lint.path}</echo>
+
+    <php function="str_replace" returnProperty="lint.include">
+      <param value=","/>
+      <param value=",**.*"/>
+      <param value="${phpqa.source.suffix}"/>
+    </php>
+    <php function="str_replace" returnProperty="lint.exclude">
+      <param value=","/>
+      <param value="/**,**/"/>
+      <param value="${phpqa.exclude.path}"/>
+    </php>
+
     <apply executable="php" checkreturn="true">
       <arg value="-l" />
       <fileset dir="${lint.path}">
-        <include name="**/*.php" />
-        <!-- exclude name="**/path/to/exclude/**" / -->
+        <include name="**/*${lint.include}" />
+        <exclude name="**/${lint.exclude}/**" / -->
       </fileset>
     </apply>
   </target>
