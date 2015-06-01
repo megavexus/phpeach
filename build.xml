@@ -221,7 +221,15 @@
 
   <target name="qa:tests:phpunit" depends="qa:main:config"
       description="Run unit tests with PHPUnit">
-    <exec executable='${phpqa.tools.path}/phpunit' passthru="true" />
+    <property name="command" value='${phpqa.tools.path}/phpunit' override="true" />
+    <property name="command" value='${command} --coverage-html build/coverage' override="true" />
+    <property name="command" value='${command} --coverage-clover build/logs/clover.xml' override="true" />
+    <property name="command" value='${command} --log-junit build/logs/junit.xml' override="true" />
+    <property name="command" value='${command} --coverage-crap4j build/logs/crap4j.xml' override="true" />
+    <property name="command" value='${command} --testdox-html build/coverage/testdox.html' override="true" />
+
+    <exec command='${command}' passthru="true" />
+
   </target>
 
   <target name="qa:tests:phpspec" depends="qa:main:config"
