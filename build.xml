@@ -148,7 +148,15 @@
 
   <target name="qa:check:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <property name="phpmd.exclude" value='--exclude ${phpqa.exclude.path}' override="true" />
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
+    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} text' override="true" />
     <property name="command" value='${command} ${phpqa.phpmd.ruleset}' override="true" />
@@ -158,7 +166,15 @@
 
   <target name="qa:ci:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD creating a log file for the continuous integration server">
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <property name="phpmd.exclude" value='--exclude ${phpqa.exclude.path}' override="true" />
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
+    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} xml' override="true" />
     <property name="command" value='${command} ${phpqa.phpmd.ruleset}' override="true" />
