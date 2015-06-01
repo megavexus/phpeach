@@ -30,10 +30,13 @@
 
   <target name="qa:main:config" hidden="true">
     <!-- defaults -->
-    <property name="vendors.path" value="vendor" />
+    <property name="vendors.path" value="${project.basedir}/vendor" />
     <property name="phpqa.tools.path" value="${vendors.path}/bin" />
-    <property name="phpqa.build.path" value="build" />
-    <property name="phpqa.source.path" value="src" />
+    <property name="phpqa.build.path" value="${project.basedir}/build" />
+    <property name="phpqa.source.path" value="${project.basedir}/src" />
+    <property name="phpqa.source.suffix" value="php" />
+    <property name="phpqa.exclude.path" value="" />
+    <property name="phpqa.tests.path" value="${project.basedir}/tests" />
     <property name="phpqa.source.list" value="" />
 
     <!-- create paths -->
