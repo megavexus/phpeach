@@ -90,8 +90,28 @@
 
   <target name="qa:check:phploc" depends="qa:main:config"
       description="Measure project size using PHPLOC">
+
+    <php function="str_replace" returnProperty="phploc.names">
+      <param value=","/>
+      <param value=",*"/>
+      <param value="${phpqa.source.suffix}"/>
+    </php>
+
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
+        <php function="str_replace" returnProperty="phploc.exclude">
+          <param value=","/>
+          <param value=" --exclude "/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
-    <property name="command" value='${command} --count-tests' override="true" />
+    <property name="command" value='${command} --names *${phploc.names} ${phploc.exclude}' override="true" />
+    <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
 
     <exec command='${command}' passthru="true" />
@@ -99,8 +119,26 @@
 
   <target name="qa:ci:phploc" depends="qa:main:config"
       description="Measure project size using PHPLOC">
+
+    <php function="str_replace" returnProperty="phploc.names">
+      <param value=","/>
+      <param value=",*"/>
+      <param value="${phpqa.source.suffix}"/>
+    </php>
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
+        <php function="str_replace" returnProperty="phploc.exclude">
+          <param value=","/>
+          <param value=" --exclude "/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
-    <property name="command" value='${command} --count-tests' override="true" />
+    <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
     <property name="command" value='${command} --log-csv ${phpqa.build.path}/logs/phploc.csv' override="true" />
     <property name="command" value='${command} --log-xml ${phpqa.build.path}/logs/phploc.xml' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
