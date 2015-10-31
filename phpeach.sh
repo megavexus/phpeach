@@ -18,27 +18,21 @@ else
     PHPEACH_TOOLS_PATH=${PHPEACH_TOOLS_PATH%/}/
 fi
 
-# Tools activation
-CHECK_ACTIVE['syntax']=1
-CHECK_ACTIVE['cs-fix']=1
-CHECK_ACTIVE['psr']=1
-CHECK_ACTIVE['mess-code']=1
-CHECK_ACTIVE['tests']=1
-
 # Initialize
 STATUS_CODE=0
 function check_failed() { STATUS_CODE=$1; }
 function check_is_ok() { [ $STATUS_CODE -eq 0 ]; return $?; }
-function check_is_active() { [ ! ${CHECK_ACTIVE[$1]} -eq 0 ]; return $?; }
+function check_is_active() { TOOL=PHPEACH_ACTIVE_$1; [ ! ${!TOOL=1} -eq 0 ]; return $?; }
 
 # Come on...
 echo -e "\n-=[ Code Quality Review ]=-\n"
 
+# Get files to checkup
 LIST_FILES=$*
 [ "$LIST_FILES" == "" ] && echo "No files to check" && check_failed -1
 
 # Lint php
-if check_is_ok && check_is_active syntax; then
+if check_is_ok && check_is_active SYNTAX; then
     echo -e "Checking syntax errors..."
 
     for PHP_SCRIPT in $LIST_FILES; do
@@ -50,7 +44,7 @@ if check_is_ok && check_is_active syntax; then
 fi
 
 # Coding Standard Fixer
-if check_is_ok && check_is_active cs-fix; then
+if check_is_ok && check_is_active FIXER; then
     echo -e "\nChecking code to fix..."
 
     for PHP_SCRIPT in $LIST_FILES; do
@@ -64,7 +58,7 @@ if check_is_ok && check_is_active cs-fix; then
 fi
 
 # Code Sniffer
-if check_is_ok && check_is_active psr; then
+if check_is_ok && check_is_active PSR; then
     echo -e "\nChecking code style..."
 
     for PHP_SCRIPT in $LIST_FILES; do
@@ -75,7 +69,7 @@ if check_is_ok && check_is_active psr; then
 fi
 
 # Mess Detector
-if check_is_ok && check_is_active mess-code; then
+if check_is_ok && check_is_active MESSCODE; then
     echo -e "\nChecking code mess..."
 
     for PHP_SCRIPT in $LIST_FILES; do
@@ -87,7 +81,7 @@ if check_is_ok && check_is_active mess-code; then
 fi
 
 # Tests
-if check_is_ok && check_is_active tests; then
+if check_is_ok && check_is_active TESTS; then
 
     echo -e "\nRunning tests..."
 
