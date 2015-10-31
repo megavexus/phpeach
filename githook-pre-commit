@@ -4,7 +4,7 @@ PATH_PWD=$(pwd)
 SCRIPT_PATH=$(dirname $(realpath $0))
 SCRIPT_NAME=$(basename $(realpath $0))
 
-. ${SCRIPT_PATH}/phpeach.conf
+source ${SCRIPT_PATH}/phpeach.conf 2> /dev/null || source ${SCRIPT_PATH}/phpeach.conf.dist
 
 if git rev-parse --verify HEAD >/dev/null 2>&1; then
     against=HEAD
@@ -15,10 +15,10 @@ fi
 
 GITHOOK_CMD_FILES="git diff-index --name-only --cached --diff-filter=AM $against"
 if [[ "${GITHOOK_GREP_WHITELIST_FILTER}" != "" ]]; then
-	GITHOOK_CMD_FILES="${GITHOOK_CMD_FILES} | ${GITHOOK_GREP_WHITELIST_FILTER}"
+    GITHOOK_CMD_FILES="${GITHOOK_CMD_FILES} | ${GITHOOK_GREP_WHITELIST_FILTER}"
 fi
 if [[ "${GITHOOK_GREP_BLACKLIST_FILTER}" != "" ]]; then
-	GITHOOK_CMD_FILES="${GITHOOK_CMD_FILES} | ${GITHOOK_GREP_BLACKLIST_FILTER}"
+    GITHOOK_CMD_FILES="${GITHOOK_CMD_FILES} | ${GITHOOK_GREP_BLACKLIST_FILTER}"
 fi
 
 GITHOOK_FILES=$(eval "${GITHOOK_CMD_FILES}")

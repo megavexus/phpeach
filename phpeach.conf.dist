@@ -1,15 +1,17 @@
-
 ## Tools config
 # Where tools are installed (phpcs, phpunit, ...)
+# By default search in "./" and "vendor/bin/"
 #PHPEACH_TOOLS_PATH=/usr/local/bin
 
 ## List of Coding Standard Fixers
 # See "php-cs-fixer fix --help" to view list completion
 PHPEACH_CODE_FIXERS=braces,encoding,eof_ending,function_call_space,indentation,line_after_namespace,linefeed,lowercase_keywords,lowercase_constants,method_argument_space,multiple_use,parenthesis,trailing_spaces,short_tag,php_closing_tag,single_line_after_imports,extra_empty_lines,elseif,function_declaration,visibility
-	
+
 ## Code standard to review
 # See "phpcs -i" to list the standars supported
 PHPEACH_CODE_STANDARD=PSR2
+# Options to PHPCS (with -n warnings are omitted)
+PHPEACH_CS_OPTS="--colors -n"
 
 ## Rulesets to detect mess code
 # See "phpmd --help" to view more values
@@ -18,11 +20,19 @@ PHPEACH_MESS_RULESET=controversial
 ## PHPUnit config tests
 PHPEACH_PHPUNIT_BOOTSTRAP=./vendor/autoload.php
 PHPEACH_PHPUNIT_TESTPATH=./Tests
-# Uncomment to add options to phpunit
-#PHPEACH_PHPUNIT_EXTENDS=--colors
+# Additional options to phpunit
+PHPEACH_PHPUNIT_OPTS="--colors"
+
+## Tools activation
+# Setup 0 to off or 1 to on a tool checking
+#PHPEACH_ACTIVE_SYNTAX=0
+#PHPEACH_ACTIVE_FIXER=0
+#PHPEACH_ACTIVE_PSR=0
+#PHPEACH_ACTIVE_MESSCODE=0
+#PHPEACH_ACTIVE_TESTS=0
 
 ## Git hook precommit config
-# Files filter selection 
+# Files filter selection
 GITHOOK_GREP_WHITELIST_FILTER="grep -E '.*\.php$'"
-# Files selected in white list that should not be 
+# Files selected in white list that should not be
 #GITHOOK_GREP_BLACKLIST_FILTER="grep -v 'spec/'"
