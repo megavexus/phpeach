@@ -25,7 +25,6 @@
         "sebastian/phpcpd": "*",
 
         "theseer/phpdox": "*",
-        "apigen/apigen": "*",
-        "nette/nette": "~2.2"
+        "apigen/apigen": "~4.0"
     }
 }
