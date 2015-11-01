@@ -5,7 +5,10 @@
 
 ## List of Coding Standard Fixers
 # See "php-cs-fixer fix --help" to view list completion
-PHPEACH_CODE_FIXERS=braces,encoding,eof_ending,function_call_space,indentation,line_after_namespace,linefeed,lowercase_keywords,lowercase_constants,method_argument_space,multiple_use,parenthesis,trailing_spaces,short_tag,php_closing_tag,single_line_after_imports,extra_empty_lines,elseif,function_declaration,visibility
+PHPEACH_CODE_FIXERS=braces,encoding,eof_ending,function_call_space,indentation,\
+line_after_namespace,linefeed,lowercase_keywords,lowercase_constants,method_argument_space,\
+multiple_use,parenthesis,trailing_spaces,short_tag,php_closing_tag,single_line_after_imports,\
+extra_empty_lines,elseif,function_declaration,visibility,duplicate_semicolon
 
 ## Code standard to review
 # See "phpcs -i" to list the standars supported
@@ -19,9 +22,15 @@ PHPEACH_MESS_RULESET=controversial
 
 ## PHPUnit config tests
 PHPEACH_PHPUNIT_BOOTSTRAP=./vendor/autoload.php
-PHPEACH_PHPUNIT_TESTPATH=./Tests
+PHPEACH_PHPUNIT_TESTS=./Tests
 # Additional options to phpunit
 PHPEACH_PHPUNIT_OPTS="--colors"
+
+## PhpSpecs config
+PHPEACH_PHPSPEC_BOOTSTRAP=${PHPEACH_PHPUNIT_BOOTSTRAP}
+PHPEACH_PHPSPEC_SPECS=./spec
+# Additional options to phpspec
+PHPEACH_PHPSPEC_OPTS="--ansi"
 
 ## Tools activation
 # Setup 0 to off or 1 to on a tool checking
@@ -30,6 +39,7 @@ PHPEACH_PHPUNIT_OPTS="--colors"
 #PHPEACH_ACTIVE_PSR=0
 #PHPEACH_ACTIVE_MESSCODE=0
 #PHPEACH_ACTIVE_TESTS=0
+PHPEACH_ACTIVE_SPECS=0
 
 ## Git hook precommit config
 # Files filter selection

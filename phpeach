@@ -89,8 +89,18 @@ if check_is_ok && check_is_active TESTS; then
 
     echo -e "\nRunning tests..."
 
-    if ! ${PHPEACH_TOOLS_PATH}phpunit --bootstrap ${PHPEACH_PHPUNIT_BOOTSTRAP} ${PHPEACH_PHPUNIT_OPTS} ${PHPEACH_PHPUNIT_TESTPATH}; then
+    if ! ${PHPEACH_TOOLS_PATH}phpunit --bootstrap ${PHPEACH_PHPUNIT_BOOTSTRAP} ${PHPEACH_PHPUNIT_OPTS} ${PHPEACH_PHPUNIT_TESTS}; then
         check_failed 16
+    fi
+fi
+
+# Specs
+if check_is_ok && check_is_active SPECS; then
+
+    echo -e "\nRunning specifications..."
+
+    if ! ${PHPEACH_TOOLS_PATH}phpspec  run --no-code-generation --bootstrap=${PHPEACH_PHPSPEC_BOOTSTRAP} ${PHPEACH_PHPSPEC_OPTS} ${PHPEACH_PHPSPEC_SPECS}; then
+        check_failed 32
     fi
 fi
 
