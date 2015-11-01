@@ -83,7 +83,7 @@
       <arg value="-l" />
       <fileset dir="${lint.path}">
         <include name="**/*${lint.include}" />
-        <exclude name="**/${lint.exclude}/**" / -->
+        <exclude name="**/${lint.exclude}/**" />
       </fileset>
     </apply>
   </target>
