@@ -9,7 +9,7 @@
         }
     ],
     "bin": ["phpeach"],
-    "require-dev": {
+    "require": {
         "phing/phing": "~2.8",
 
         "phpunit/phpunit": "~4.1",
