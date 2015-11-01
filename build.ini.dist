@@ -1,0 +1,12 @@
+;phpqa.tools.path=
+phpqa.build.path=build
+phpqa.source.path=../src
+phpqa.source.suffix=php,inc
+phpqa.tests.path=../tests
+phpqa.source.list=Command,Descriptor,Event,Helper,Input
+
+phpqa.exclude.path=Command,Descriptor
+
+
+phpqa.phpmd.ruleset=cleancode,codesize,controversial,design,naming,unusedcode
+phpqa.phpcs.standard=PSR2
