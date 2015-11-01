@@ -4,7 +4,8 @@ PATH_PWD=$(pwd)
 SCRIPT_PATH=$(dirname $(realpath $0))
 SCRIPT_NAME=$(basename $(realpath $0))
 
-source ${SCRIPT_PATH}/phpeach.conf 2> /dev/null || source ${SCRIPT_PATH}/phpeach.conf.dist
+# Setup config, please...
+source ${SCRIPT_PATH}/phpeach.conf.dist && source ${PATH_PWD}/phpeach.conf 2> /dev/null
 
 if git rev-parse --verify HEAD >/dev/null 2>&1; then
     against=HEAD
@@ -27,7 +28,7 @@ if [[ "$GITHOOK_FILES" == "" ]]; then
     exit 0
 fi
 
-${SCRIPT_PATH}/phpeach.sh ${GITHOOK_FILES}
+${SCRIPT_PATH}/phpeach ${GITHOOK_FILES}
 IS_OK=$?
 
 exit $IS_OK

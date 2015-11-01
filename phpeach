@@ -1,14 +1,14 @@
 #!/bin/bash
 
 PATH_PWD=$(pwd)
-SCRIPT_PATH=$(cd $(dirname $0); pwd)
-SCRIPT_NAME=$(basename $0)
+SCRIPT_PATH=$(dirname $(realpath $0))
+SCRIPT_NAME=$(basename $(realpath $0))
 
 # Tools are in same path?
 PHPEACH_TOOLS_PATH=$([ -e ${SCRIPT_PATH}/phpcs ] && echo ${SCRIPT_PATH}/)
 
 # Setup config, please...
-source ${SCRIPT_PATH}/phpeach.conf 2> /dev/null || source ${SCRIPT_PATH}/phpeach.conf.dist
+source ${SCRIPT_PATH}/phpeach.conf.dist && source ${PATH_PWD}/phpeach.conf 2> /dev/null
 
 # Tools are under vendors deploy?
 if [[ "$PHPEACH_TOOLS_PATH" == "" ]]; then
@@ -55,6 +55,10 @@ if check_is_ok && check_is_active FIXER; then
             echo ${PHP_SCRIPT}...Ok
         fi
     done
+    if ! check_is_ok; then
+        echo -e "\nRun this command for each file to fix it..."
+        echo -e ${PHPEACH_TOOLS_PATH}php-cs-fixer fix --fixers=${PHPEACH_CODE_FIXERS} "<file>\n"
+    fi
 fi
 
 # Code Sniffer
@@ -85,8 +89,18 @@ if check_is_ok && check_is_active TESTS; then
 
     echo -e "\nRunning tests..."
 
-    if ! ${PHPEACH_TOOLS_PATH}phpunit --bootstrap ${PHPEACH_PHPUNIT_BOOTSTRAP} ${PHPEACH_PHPUNIT_OPTS} ${PHPEACH_PHPUNIT_TESTPATH}; then
+    if ! ${PHPEACH_TOOLS_PATH}phpunit --bootstrap ${PHPEACH_PHPUNIT_BOOTSTRAP} ${PHPEACH_PHPUNIT_OPTS} ${PHPEACH_PHPUNIT_TESTS}; then
         check_failed 16
+    fi
+fi
+
+# Specs
+if check_is_ok && check_is_active SPECS; then
+
+    echo -e "\nRunning specifications..."
+
+    if ! ${PHPEACH_TOOLS_PATH}phpspec  run --no-code-generation --bootstrap=${PHPEACH_PHPSPEC_BOOTSTRAP} ${PHPEACH_PHPSPEC_OPTS} ${PHPEACH_PHPSPEC_SPECS}; then
+        check_failed 32
     fi
 fi
 
