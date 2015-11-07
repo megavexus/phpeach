@@ -5,7 +5,7 @@
   <property file="build.ini.dist" />
 
   <target name="qa:build" description="Main build quality data and info for CI tools"
-      depends="qa:main:prepare,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:doc:apigen,qa:ci:phpspec,qa:doc:phpdox" />
+      depends="qa:main:prepare,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:ci:phpspec,qa:doc:phpdox" />
 
   <target name="qa:check" description="Pass main tools to verify quality of code"
       depends="qa:main:config,qa:check:lint,qa:check:phploc,qa:check:phpcs,qa:check:phpmd,qa:check:phpcpd,qa:tests:phpspec" />
@@ -295,7 +295,7 @@
     <property name="command" value='${command} --log-junit build/logs/junit.xml' override="true" />
     <property name="command" value='${command} --coverage-crap4j build/logs/crap4j.xml' override="true" />
     <property name="command" value='${command} --testdox-html build/coverage/testdox.html' override="true" />
-
+    
     <exec command='${command}' passthru="true" />
 
   </target>
@@ -327,19 +327,6 @@
         </replaceregexp>
       </filterchain>
     </reflexive>
-  </target>
-
-  <target name="qa:doc:apigen" depends="qa:main:config"
-      description="Generate API documentation using ApiGen">
-    <property name="command" value='${phpqa.tools.path}/apigen generate' override="true" />
-    <property name="command" value='${command} --source=${phpqa.source.list}' override="true" />
-    <property name="command" value='${command} --destination=${phpqa.build.path}/api' override="true" />
-    <property name="command" value='${command} --title="API Doc"' override="true" />
-    <property name="command" value='${command} --tree --todo --quiet' override="true" />
-    <!-- property name="command" value='${command} __exclude */Resources/*' override="true" / -->
-
-    <exec command='${command}' passthru="true" />
-
   </target>
 
 </project>
