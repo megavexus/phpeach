@@ -100,12 +100,12 @@
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
         <php function="str_replace" returnProperty="phploc.exclude">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
         </php>
+        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
       </then>
     </if>
 
@@ -128,12 +128,12 @@
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
         <php function="str_replace" returnProperty="phploc.exclude">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
         </php>
+        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
       </then>
     </if>
 
