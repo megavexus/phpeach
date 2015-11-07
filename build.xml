@@ -237,12 +237,24 @@
 
   <target name="qa:check:phpcpd" depends="qa:main:config"
       description="Find duplicate code using PHPCPD">
+
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <php function="str_replace" returnProperty="phpcpd.exclude">
+          <param value=","/>
+          <param value=" --exclude "/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="phpcpd.exclude" value='--exclude ${phpcpd.exclude}' override="true" />
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/phpcpd' override="true" />
-    <!-- property name="command" value='${command} __names ${phpqa.include.path}' override="true" />
-    <property name="command" value='${command} __names-exclude ${phpqa.exclude.path}' override="true" />
-    <property name="command" value='${command} __exclude ${phpqa.exclude.path}' override="true" /-->
+    <property name="command" value='${command} --names=*${phpcpd.names}' override="true" />
+    <property name="command" value='${command} ${phpcpd.exclude}' override="true" />
     <property name="command" value='${command} --log-pmd ${phpqa.build.path}/logs/pmd-cpd.xml' override="true" />
-    <property name="command" value='${command} ${phpqa.source}' override="true" />
+    <property name="command" value='${command} -n ${phpqa.source}' override="true" />
 
     <exec command='${command}' passthru="true" />
 
