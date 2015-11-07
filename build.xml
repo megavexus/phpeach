@@ -5,12 +5,13 @@
   <property file="build.ini.dist" />
 
   <target name="qa:build" description="Main build quality data and info for CI tools"
-      depends="qa:main:prepare,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:doc:apigen,qa:ci:phpspec,qa:doc:phpdox" />
+      depends="qa:main:prepare,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:ci:phpspec,qa:doc:phpdox" />
 
   <target name="qa:check" description="Pass main tools to verify quality of code"
       depends="qa:main:config,qa:check:lint,qa:check:phploc,qa:check:phpcs,qa:check:phpmd,qa:check:phpcpd,qa:tests:phpspec" />
 
-  <target name="qa:main:clean" description="Cleanup build artifacts">
+  <target name="qa:main:clean" description="Cleanup build artifacts"
+      depends="qa:main:config" >
     <delete dir="${phpqa.build.path}/api" />
     <delete dir="${phpqa.build.path}/doc" />
     <delete dir="${phpqa.build.path}/coverage" />
@@ -19,7 +20,7 @@
   </target>
 
   <target name="qa:main:prepare" description="Prepare for build"
-      depends="qa:main:config,qa:main:clean" >
+      depends="qa:main:clean" >
     <mkdir dir="${phpqa.build.path}/api" />
     <mkdir dir="${phpqa.build.path}/doc" />
     <mkdir dir="${phpqa.build.path}/coverage" />
@@ -100,12 +101,12 @@
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
         <php function="str_replace" returnProperty="phploc.exclude">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
         </php>
+        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
       </then>
     </if>
 
@@ -128,12 +129,12 @@
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
         <php function="str_replace" returnProperty="phploc.exclude">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
         </php>
+        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
       </then>
     </if>
 
@@ -236,12 +237,24 @@
 
   <target name="qa:check:phpcpd" depends="qa:main:config"
       description="Find duplicate code using PHPCPD">
+
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <php function="str_replace" returnProperty="phpcpd.exclude">
+          <param value=","/>
+          <param value=" --exclude "/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="phpcpd.exclude" value='--exclude ${phpcpd.exclude}' override="true" />
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/phpcpd' override="true" />
-    <!-- property name="command" value='${command} __names ${phpqa.include.path}' override="true" />
-    <property name="command" value='${command} __names-exclude ${phpqa.exclude.path}' override="true" />
-    <property name="command" value='${command} __exclude ${phpqa.exclude.path}' override="true" /-->
+    <property name="command" value='${command} --names=*${phpcpd.names}' override="true" />
+    <property name="command" value='${command} ${phpcpd.exclude}' override="true" />
     <property name="command" value='${command} --log-pmd ${phpqa.build.path}/logs/pmd-cpd.xml' override="true" />
-    <property name="command" value='${command} ${phpqa.source}' override="true" />
+    <property name="command" value='${command} -n ${phpqa.source}' override="true" />
 
     <exec command='${command}' passthru="true" />
 
@@ -249,10 +262,20 @@
 
   <target name="qa:check:pdepend" depends="qa:main:config"
       description="Calculate software metrics using PHP_Depend">
+
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <property name="pdepend.exclude" value='--ignore=${phpqa.exclude.path}' override="true" />
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/pdepend' override="true" />
     <property name="command" value='${command} --jdepend-xml=${phpqa.build.path}/logs/jdepend.xml' override="true" />
     <property name="command" value='${command} --jdepend-chart=${phpqa.build.path}/pdepend/dependencies.svg' override="true" />
     <property name="command" value='${command} --overview-pyramid=${phpqa.build.path}/pdepend/overview-pyramid.svg' override="true" />
+    <property name="command" value='${command} --suffix=${phpqa.source.suffix}' override="true" />
+    <property name="command" value='${command} ${pdepend.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
 
     <exec command='${command}' />
@@ -272,7 +295,7 @@
     <property name="command" value='${command} --log-junit build/logs/junit.xml' override="true" />
     <property name="command" value='${command} --coverage-crap4j build/logs/crap4j.xml' override="true" />
     <property name="command" value='${command} --testdox-html build/coverage/testdox.html' override="true" />
-
+    
     <exec command='${command}' passthru="true" />
 
   </target>
@@ -304,19 +327,6 @@
         </replaceregexp>
       </filterchain>
     </reflexive>
-  </target>
-
-  <target name="qa:doc:apigen" depends="qa:main:config"
-      description="Generate API documentation using ApiGen">
-    <property name="command" value='${phpqa.tools.path}/apigen generate' override="true" />
-    <property name="command" value='${command} --source=${phpqa.source.list}' override="true" />
-    <property name="command" value='${command} --destination=${phpqa.build.path}/api' override="true" />
-    <property name="command" value='${command} --title="API Doc"' override="true" />
-    <property name="command" value='${command} --tree --todo --quiet' override="true" />
-    <!-- property name="command" value='${command} __exclude */Resources/*' override="true" / -->
-
-    <exec command='${command}' passthru="true" />
-
   </target>
 
 </project>

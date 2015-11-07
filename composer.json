@@ -24,7 +24,6 @@
         "phpmd/phpmd": "*",
         "sebastian/phpcpd": "*",
 
-        "theseer/phpdox": "*",
-        "apigen/apigen": "~4.0"
+        "theseer/phpdox": "*"
     }
 }
