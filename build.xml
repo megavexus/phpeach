@@ -262,10 +262,20 @@
 
   <target name="qa:check:pdepend" depends="qa:main:config"
       description="Calculate software metrics using PHP_Depend">
+
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <property name="pdepend.exclude" value='--ignore=${phpqa.exclude.path}' override="true" />
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/pdepend' override="true" />
     <property name="command" value='${command} --jdepend-xml=${phpqa.build.path}/logs/jdepend.xml' override="true" />
     <property name="command" value='${command} --jdepend-chart=${phpqa.build.path}/pdepend/dependencies.svg' override="true" />
     <property name="command" value='${command} --overview-pyramid=${phpqa.build.path}/pdepend/overview-pyramid.svg' override="true" />
+    <property name="command" value='${command} --suffix=${phpqa.source.suffix}' override="true" />
+    <property name="command" value='${command} ${pdepend.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
 
     <exec command='${command}' />
