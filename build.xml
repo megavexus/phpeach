@@ -10,7 +10,8 @@
   <target name="qa:check" description="Pass main tools to verify quality of code"
       depends="qa:main:config,qa:check:lint,qa:check:phploc,qa:check:phpcs,qa:check:phpmd,qa:check:phpcpd,qa:tests:phpspec" />
 
-  <target name="qa:main:clean" description="Cleanup build artifacts">
+  <target name="qa:main:clean" description="Cleanup build artifacts"
+      depends="qa:main:config" >
     <delete dir="${phpqa.build.path}/api" />
     <delete dir="${phpqa.build.path}/doc" />
     <delete dir="${phpqa.build.path}/coverage" />
@@ -19,7 +20,7 @@
   </target>
 
   <target name="qa:main:prepare" description="Prepare for build"
-      depends="qa:main:config,qa:main:clean" >
+      depends="qa:main:clean" >
     <mkdir dir="${phpqa.build.path}/api" />
     <mkdir dir="${phpqa.build.path}/doc" />
     <mkdir dir="${phpqa.build.path}/coverage" />
