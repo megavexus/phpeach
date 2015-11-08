@@ -105,6 +105,7 @@
       <param value="${phpqa.source.suffix}"/>
     </php>
 
+    <property name="phploc.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
@@ -121,7 +122,7 @@
     <property name="command" value='${command} --names *${phploc.names} ${phploc.exclude}' override="true" />
     <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
-
+    
     <exec command='${command}' passthru="true" />
   </target>
 
@@ -133,6 +134,8 @@
       <param value=",*"/>
       <param value="${phpqa.source.suffix}"/>
     </php>
+    
+    <property name="phploc.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
