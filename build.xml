@@ -34,11 +34,11 @@
     <!-- defaults -->
     <property name="vendors.path" value="${project.basedir}/vendor" />
     <property name="phpqa.tools.path" value="${vendors.path}/bin" />
-    <property name="phpqa.build.path" value="${project.basedir}/build" />
-    <property name="phpqa.source.path" value="${project.basedir}/src" />
+    <property name="phpqa.build.path" value="build" />
+    <property name="phpqa.source.path" value="src" />
     <property name="phpqa.source.suffix" value="php" />
     <property name="phpqa.exclude.path" value="" />
-    <property name="phpqa.tests.path" value="${project.basedir}/tests" />
+    <property name="phpqa.tests.path" value="tests" />
     <property name="phpqa.source.list" value="" />
 
     <!-- create paths -->
@@ -319,7 +319,49 @@
 
   <target name="qa:doc:phpdox" depends="qa:main:config"
       description="Generate API documentation using phpDox">
+
+    <available file="phpdox.xml.dist" property="phpdox.xml" value="true" />
+    
+    <if>
+        <not><isset property="phpdox.xml" /></not>
+        <then>
+            <php function="str_replace" returnProperty="phpdox.include" level="verbose" >
+              <param value="," />
+              <param value='" /&gt;&lt;include mask=".*' />
+              <param value="${phpqa.source.suffix}" />
+            </php>
+            <property name="phpdox.include" value='&lt;include mask="*.${phpdox.include}" /&gt;' override="true" />
+
+            <property name="phpdox.exclude" value='' override="true" />
+            <if>
+              <istrue value="${phpqa.exclude.path}" />
+              <then>
+                <php function="str_replace" returnProperty="phpdox.exclude" level="verbose">
+                  <param value="," />
+                  <param value='/*" /&gt;&lt;exclude mask="*/' />
+                  <param value="${phpqa.exclude.path}"/>
+                </php>
+                <property name="phpdox.exclude" value='&lt;exclude mask="*/${phpdox.exclude}/*" /&gt;' override="true" />
+              </then>
+            </if>
+
+            <copy file="${phing.dir}/phpdox.xml.dist" todir="${project.basedir}">
+                <filterchain>
+                    <expandproperties />
+                </filterchain>
+            </copy>
+        </then>
+    </if>
+      
     <exec executable='${phpqa.tools.path}/phpdox' passthru="true" />
+    
+    <if>
+        <not><isset property="phpdox.xml" /></not>
+        <then>
+            <delete file="phpdox.xml.dist" />
+        </then>
+    </if>
+    
   </target>
 
   <target name="qa:tests:phpunit" depends="qa:main:config"
