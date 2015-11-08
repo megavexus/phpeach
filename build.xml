@@ -3,9 +3,10 @@
 <project name="QA artifacts builder" default="qa:build">
   <property file="build.ini" />
   <property file="build.ini.dist" />
+  <property file="${phing.dir}/build.ini.dist" />
 
   <target name="qa:build" description="Main build quality data and info for CI tools"
-      depends="qa:main:prepare,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:ci:phpspec,qa:doc:phpdox" />
+      depends="qa:main:prepare,qa:check:lint,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:ci:phpspec,qa:doc:phpdox" />
 
   <target name="qa:check" description="Pass main tools to verify quality of code"
       depends="qa:main:config,qa:check:lint,qa:check:phploc,qa:check:phpcs,qa:check:phpmd,qa:check:phpcpd,qa:tests:phpspec" />
@@ -69,22 +70,28 @@
   <target name="lint-path" hidden="true" >
     <echo>Checking ${lint.path}</echo>
 
-    <php function="str_replace" returnProperty="lint.include">
+    <php function="str_replace" returnProperty="lint.include" level="verbose">
       <param value=","/>
       <param value=",**.*"/>
       <param value="${phpqa.source.suffix}"/>
     </php>
-    <php function="str_replace" returnProperty="lint.exclude">
-      <param value=","/>
-      <param value="/**,**/"/>
-      <param value="${phpqa.exclude.path}"/>
-    </php>
-
+    
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <php function="str_replace" returnProperty="lint.exclude" level="verbose">
+          <param value=","/>
+          <param value="/**,**/"/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="lint.exclude" value="**/${lint.exclude}/**" override="true" />
+      </then>
+    </if>
+    
     <apply executable="php" checkreturn="true">
       <arg value="-l" />
-      <fileset dir="${lint.path}">
+      <fileset dir="${lint.path}" excludes="${lint.exclude}" >
         <include name="**/*${lint.include}" />
-        <exclude name="**/${lint.exclude}/**" />
       </fileset>
     </apply>
   </target>
@@ -92,16 +99,17 @@
   <target name="qa:check:phploc" depends="qa:main:config"
       description="Measure project size using PHPLOC">
 
-    <php function="str_replace" returnProperty="phploc.names">
+    <php function="str_replace" returnProperty="phploc.names" level="verbose">
       <param value=","/>
       <param value=",*"/>
       <param value="${phpqa.source.suffix}"/>
     </php>
 
+    <property name="phploc.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phploc.exclude">
+        <php function="str_replace" returnProperty="phploc.exclude" level="verbose">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
@@ -114,22 +122,24 @@
     <property name="command" value='${command} --names *${phploc.names} ${phploc.exclude}' override="true" />
     <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
-
+    
     <exec command='${command}' passthru="true" />
   </target>
 
   <target name="qa:ci:phploc" depends="qa:main:config"
       description="Measure project size using PHPLOC">
 
-    <php function="str_replace" returnProperty="phploc.names">
+    <php function="str_replace" returnProperty="phploc.names" level="verbose">
       <param value=","/>
       <param value=",*"/>
       <param value="${phpqa.source.suffix}"/>
     </php>
+    
+    <property name="phploc.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phploc.exclude">
+        <php function="str_replace" returnProperty="phploc.exclude" level="verbose">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
@@ -149,49 +159,65 @@
 
   <target name="qa:check:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
+      
+    <property name="phpmd.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phpmd.exclude" value='--exclude ${phpqa.exclude.path}' override="true" />
+        <php function="str_replace" returnProperty="phpmd.exclude" level="verbose">
+          <param value=","/>
+          <param value="/,"/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="phpmd.exclude" value='--exclude ${phpmd.exclude}/' override="true" />
       </then>
     </if>
-
+    
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
-    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} text' override="true" />
     <property name="command" value='${command} ${phpqa.phpmd.ruleset}' override="true" />
+    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
 
     <exec command='${command}' passthru="true" />
+    
   </target>
 
   <target name="qa:ci:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD creating a log file for the continuous integration server">
+      
+    <property name="phpmd.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phpmd.exclude" value='--exclude ${phpqa.exclude.path}' override="true" />
+        <php function="str_replace" returnProperty="phpmd.exclude" level="verbose">
+          <param value=","/>
+          <param value="/,"/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="phpmd.exclude" value='--exclude ${phpmd.exclude}/' override="true" />
       </then>
     </if>
 
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
-    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} xml' override="true" />
     <property name="command" value='${command} ${phpqa.phpmd.ruleset}' override="true" />
+    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
     <property name="command" value='${command} --reportfile ${phpqa.build.path}/logs/pmd.xml' override="true" />
 
     <exec command='${command}' />
-
+    
   </target>
 
   <target name="qa:check:phpcs" depends="qa:main:config"
       description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
 
+    <property name="phpcs.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phpcs.exclude">
+        <php function="str_replace" returnProperty="phpcs.exclude" level="verbose">
           <param value=","/>
           <param value="/*,*/"/>
           <param value="${phpqa.exclude.path}"/>
@@ -212,10 +238,11 @@
   <target name="qa:ci:phpcs" depends="qa:main:config"
       description="Find coding standard violations using PHP_CodeSniffer creating a log file for the continuous integration server">
 
+    <property name="phpcs.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phpcs.exclude">
+        <php function="str_replace" returnProperty="phpcs.exclude" level="verbose">
           <param value=","/>
           <param value="/*,*/"/>
           <param value="${phpqa.exclude.path}"/>
@@ -238,10 +265,17 @@
   <target name="qa:check:phpcpd" depends="qa:main:config"
       description="Find duplicate code using PHPCPD">
 
+    <php function="str_replace" returnProperty="phpcpd.names" level="verbose">
+      <param value=","/>
+      <param value=",*"/>
+      <param value="${phpqa.source.suffix}"/>
+    </php>
+      
+    <property name="phpcpd.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phpcpd.exclude">
+        <php function="str_replace" returnProperty="phpcpd.exclude" level="verbose">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
@@ -263,6 +297,7 @@
   <target name="qa:check:pdepend" depends="qa:main:config"
       description="Calculate software metrics using PHP_Depend">
 
+    <property name="pdepend.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
