@@ -38,7 +38,6 @@
     <property name="phpqa.source.path" value="src" />
     <property name="phpqa.source.suffix" value="php" />
     <property name="phpqa.exclude.path" value="" />
-    <property name="phpqa.tests.path" value="tests" />
     <property name="phpqa.source.list" value="" />
 
     <!-- create paths -->
@@ -366,13 +365,15 @@
 
   <target name="qa:tests:phpunit" depends="qa:main:config"
       description="Run unit tests with PHPUnit">
+
     <property name="command" value='${phpqa.tools.path}/phpunit' override="true" />
     <property name="command" value='${command} --coverage-html build/coverage' override="true" />
     <property name="command" value='${command} --coverage-clover build/logs/clover.xml' override="true" />
     <property name="command" value='${command} --log-junit build/logs/junit.xml' override="true" />
     <property name="command" value='${command} --coverage-crap4j build/logs/crap4j.xml' override="true" />
     <property name="command" value='${command} --testdox-html build/coverage/testdox.html' override="true" />
-    
+    <property name="command" value='${command} ${phpqa.phpunit.options}' override="true" />
+
     <exec command='${command}' passthru="true" />
 
   </target>
