@@ -3,6 +3,7 @@
 <project name="QA artifacts builder" default="qa:build">
   <property file="build.ini" />
   <property file="build.ini.dist" />
+  <property file="${phing.dir}/build.ini.dist" />
 
   <target name="qa:build" description="Main build quality data and info for CI tools"
       depends="qa:main:prepare,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:ci:phpspec,qa:doc:phpdox" />
@@ -74,17 +75,23 @@
       <param value=",**.*"/>
       <param value="${phpqa.source.suffix}"/>
     </php>
-    <php function="str_replace" returnProperty="lint.exclude">
-      <param value=","/>
-      <param value="/**,**/"/>
-      <param value="${phpqa.exclude.path}"/>
-    </php>
-
+    
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <php function="str_replace" returnProperty="lint.exclude">
+          <param value=","/>
+          <param value="/**,**/"/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="lint.exclude" value="**/${lint.exclude}/**" override="true" />
+      </then>
+    </if>
+    
     <apply executable="php" checkreturn="true">
       <arg value="-l" />
-      <fileset dir="${lint.path}">
+      <fileset dir="${lint.path}" excludes="${lint.exclude}" >
         <include name="**/*${lint.include}" />
-        <exclude name="**/${lint.exclude}/**" />
       </fileset>
     </apply>
   </target>
