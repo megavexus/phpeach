@@ -6,7 +6,7 @@
   <property file="${phing.dir}/build.ini.dist" />
 
   <target name="qa:build" description="Main build quality data and info for CI tools"
-      depends="qa:main:prepare,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:ci:phpspec,qa:doc:phpdox" />
+      depends="qa:main:prepare,qa:check:lint,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:ci:phpspec,qa:doc:phpdox" />
 
   <target name="qa:check" description="Pass main tools to verify quality of code"
       depends="qa:main:config,qa:check:lint,qa:check:phploc,qa:check:phpcs,qa:check:phpmd,qa:check:phpcpd,qa:tests:phpspec" />
@@ -70,7 +70,7 @@
   <target name="lint-path" hidden="true" >
     <echo>Checking ${lint.path}</echo>
 
-    <php function="str_replace" returnProperty="lint.include">
+    <php function="str_replace" returnProperty="lint.include" level="verbose">
       <param value=","/>
       <param value=",**.*"/>
       <param value="${phpqa.source.suffix}"/>
@@ -79,7 +79,7 @@
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="lint.exclude">
+        <php function="str_replace" returnProperty="lint.exclude" level="verbose">
           <param value=","/>
           <param value="/**,**/"/>
           <param value="${phpqa.exclude.path}"/>
@@ -99,7 +99,7 @@
   <target name="qa:check:phploc" depends="qa:main:config"
       description="Measure project size using PHPLOC">
 
-    <php function="str_replace" returnProperty="phploc.names">
+    <php function="str_replace" returnProperty="phploc.names" level="verbose">
       <param value=","/>
       <param value=",*"/>
       <param value="${phpqa.source.suffix}"/>
@@ -109,7 +109,7 @@
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phploc.exclude">
+        <php function="str_replace" returnProperty="phploc.exclude" level="verbose">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
@@ -129,7 +129,7 @@
   <target name="qa:ci:phploc" depends="qa:main:config"
       description="Measure project size using PHPLOC">
 
-    <php function="str_replace" returnProperty="phploc.names">
+    <php function="str_replace" returnProperty="phploc.names" level="verbose">
       <param value=","/>
       <param value=",*"/>
       <param value="${phpqa.source.suffix}"/>
@@ -139,7 +139,7 @@
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phploc.exclude">
+        <php function="str_replace" returnProperty="phploc.exclude" level="verbose">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
@@ -159,6 +159,8 @@
 
   <target name="qa:check:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
+      
+    <property name="phpmd.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
@@ -177,6 +179,8 @@
 
   <target name="qa:ci:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD creating a log file for the continuous integration server">
+      
+    <property name="phpmd.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
@@ -198,10 +202,11 @@
   <target name="qa:check:phpcs" depends="qa:main:config"
       description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
 
+    <property name="phpcs.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phpcs.exclude">
+        <php function="str_replace" returnProperty="phpcs.exclude" level="verbose">
           <param value=","/>
           <param value="/*,*/"/>
           <param value="${phpqa.exclude.path}"/>
@@ -222,10 +227,11 @@
   <target name="qa:ci:phpcs" depends="qa:main:config"
       description="Find coding standard violations using PHP_CodeSniffer creating a log file for the continuous integration server">
 
+    <property name="phpcs.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phpcs.exclude">
+        <php function="str_replace" returnProperty="phpcs.exclude" level="verbose">
           <param value=","/>
           <param value="/*,*/"/>
           <param value="${phpqa.exclude.path}"/>
@@ -248,10 +254,17 @@
   <target name="qa:check:phpcpd" depends="qa:main:config"
       description="Find duplicate code using PHPCPD">
 
+    <php function="str_replace" returnProperty="phpcpd.names" level="verbose">
+      <param value=","/>
+      <param value=",*"/>
+      <param value="${phpqa.source.suffix}"/>
+    </php>
+      
+    <property name="phpcpd.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phpcpd.exclude">
+        <php function="str_replace" returnProperty="phpcpd.exclude" level="verbose">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
@@ -273,6 +286,7 @@
   <target name="qa:check:pdepend" depends="qa:main:config"
       description="Calculate software metrics using PHP_Depend">
 
+    <property name="pdepend.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
