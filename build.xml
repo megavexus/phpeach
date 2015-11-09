@@ -6,14 +6,13 @@
   <property file="${phing.dir}/build.ini.dist" />
 
   <target name="qa:build" description="Main build quality data and info for CI tools"
-      depends="qa:main:prepare,qa:check:lint,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:ci:phpspec,qa:doc:phpdox" />
+      depends="qa:main:prepare,qa:check:lint,qa:ci:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:ci:phpspec,qa:doc:phpdox" />
 
   <target name="qa:check" description="Pass main tools to verify quality of code"
       depends="qa:main:config,qa:check:lint,qa:check:phploc,qa:check:phpcs,qa:check:phpmd,qa:check:phpcpd,qa:tests:phpspec" />
 
   <target name="qa:main:clean" description="Cleanup build artifacts"
       depends="qa:main:config" >
-    <delete dir="${phpqa.build.path}/api" />
     <delete dir="${phpqa.build.path}/doc" />
     <delete dir="${phpqa.build.path}/coverage" />
     <delete dir="${phpqa.build.path}/logs" />
@@ -22,7 +21,6 @@
 
   <target name="qa:main:prepare" description="Prepare for build"
       depends="qa:main:clean" >
-    <mkdir dir="${phpqa.build.path}/api" />
     <mkdir dir="${phpqa.build.path}/doc" />
     <mkdir dir="${phpqa.build.path}/coverage" />
     <mkdir dir="${phpqa.build.path}/logs" />
@@ -118,7 +116,7 @@
     </if>
 
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
-    <property name="command" value='${command} --names *${phploc.names} ${phploc.exclude}' override="true" />
+    <property name="command" value='${command} --names *${phploc.names}' override="true" />
     <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
     
@@ -133,7 +131,7 @@
       <param value=",*"/>
       <param value="${phpqa.source.suffix}"/>
     </php>
-    
+
     <property name="phploc.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
@@ -148,6 +146,7 @@
     </if>
 
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
+    <property name="command" value='${command} --names *${phploc.names}' override="true" />
     <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
     <property name="command" value='${command} --log-csv ${phpqa.build.path}/logs/phploc.csv' override="true" />
     <property name="command" value='${command} --log-xml ${phpqa.build.path}/logs/phploc.xml' override="true" />
@@ -377,27 +376,70 @@
     <exec command='${command}' passthru="true" />
 
   </target>
+  
+  <target name="qa:tests:phpspec:config" hidden="true">
+    <property name="phpspec.yml" value="" />
+    <if>    
+        <available file="phpspec.yml.dist" />
+        <then>
+            <loadfile property="phpspec.yml" file="${project.basedir}/phpspec.yml.dist" />
+        </then>
+    </if>      
+    <if>
+        <not><contains substring="extensions:" string="${phpspec.yml}" /></not>
+        <then>
+            <property name="phpspec.yml" value="${phpspec.yml}extensions:" override="true" />
+        </then>
+    </if>
+    
+    <echo file="${project.basedir}/phpspec-coverage.yml" >
+${phpspec.yml}
 
-  <target name="qa:tests:phpspec" depends="qa:main:config"
+code_coverage:
+  whitelist: [${phpqa.source.path}]
+  blacklist: [spec,tests,vendor]
+  format: [html,clover]
+  output:
+    html: ${phpqa.build.path}/coverage
+    clover: ${phpqa.build.path}/logs/clover.xml
+    </echo>
+
+    <reflexive file="${project.basedir}/phpspec-coverage.yml">
+        <filterchain>
+            <replaceregexp>
+                <regexp pattern="extensions:\s*(\n)" replace="extensions:\1  - PhpSpec\Extension\CodeCoverageExtension\1"/>
+                <regexp pattern="[ ]+(\-.*)" replace="  \1" />
+            </replaceregexp>
+        </filterchain>
+    </reflexive>
+  </target>
+
+  <target name="qa:tests:phpspec" depends="qa:main:config,qa:tests:phpspec:config"
       description="Run tests with PHPSpec">
+            
     <property name="command" value='${phpqa.tools.path}/phpspec' override="true" />
     <property name="command" value='${command} run' override="true" />
+    <property name="command" value='${command} -c phpspec-coverage.yml' override="true" />
     <property name="command" value='${command} --no-interaction' override="true" />
 
     <exec command='${command}' passthru="true" />
 
+    <delete file="${project.basedir}/phpspec-coverage.yml" />
+    
   </target>
 
-  <target name="qa:ci:phpspec" depends="qa:main:config"
+  <target name="qa:ci:phpspec" depends="qa:main:config,qa:tests:phpspec:config"
       description="Run tests with PHPSpec">
+
     <property name="command" value='${phpqa.tools.path}/phpspec' override="true" />
     <property name="command" value='${command} run' override="true" />
+    <property name="command" value='${command} -c phpspec-coverage.yml' override="true" />
     <property name="command" value='${command} --format=junit' override="true" />
     <property name="command" value='${command} --no-interaction' override="true" />
 
     <exec command='${command}' passthru="true" output="${phpqa.build.path}/logs/junit.xml" />
 
-    <!-- Eso es para quitar los mensajes que genera phpspec y que se añaden al fichero -->
+    <!-- Remove messages generated by phpspec at the end of file -->
     <reflexive file="${phpqa.build.path}/logs/junit.xml">
       <filterchain>
         <replaceregexp>
