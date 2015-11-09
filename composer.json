@@ -8,7 +8,7 @@
             "email": "hi@oxkhar.com"
         }
     ],
-    "bin": ["phpeach"],
+    "bin": ["phpeach","phpeach-builder"],
     "require": {
         "phing/phing": "~2.8",
 
