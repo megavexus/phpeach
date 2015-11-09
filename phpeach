@@ -19,6 +19,16 @@ else
     PHPEACH_TOOLS_PATH=${PHPEACH_TOOLS_PATH%/}/
 fi
 
+if [[ "$1" == "-b" || "$1" == "--build" ]]
+then
+    shift
+
+    ${PHPEACH_TOOLS_PATH}/phing -f ${SCRIPT_PATH}/build.xml -Dproject.basedir=${PATH_PWD} -Dphpqa.tools.path=${PHPEACH_TOOLS_PATH} $*
+    $STATUS_CODE=$?
+
+    exit $STATUS_CODE
+fi
+
 # Initialize
 STATUS_CODE=0
 function check_failed() { STATUS_CODE=$1; }
