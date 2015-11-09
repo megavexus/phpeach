@@ -1,12 +1,26 @@
-;phpqa.tools.path=
-phpqa.build.path=build
-phpqa.source.path=../src
-phpqa.source.suffix=php,inc
-phpqa.tests.path=../tests
-phpqa.source.list=Command,Descriptor,Event,Helper,Input
+; Where tools bin files are installed
+;phpqa.tools.path=${project.basedir}/vendor/bin
 
-phpqa.exclude.path=Command,Descriptor
+; Path where create all logs and info files
+;phpqa.build.path=build
 
+; Source path 
+;phpqa.source.path=src
 
+; Comma-separated dirs
+;phpqa.source.list=
+
+; Comma-sperated extensions
+;phpqa.source.suffix=php
+
+; Comma-separated dirs
+;phpqa.exclude.path=
+
+; Tools config
 phpqa.phpmd.ruleset=cleancode,codesize,controversial,design,naming,unusedcode
+
 phpqa.phpcs.standard=PSR2
+
+phpqa.phpunit.options=
+
+;phpqa.phpspec.enabled=true

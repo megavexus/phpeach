@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<phpdox xmlns="http://xml.phpdox.net/config" silent="false">
+
+  <project name="PhpQA" source="${phpqa.source.path}" workdir="${phpqa.build.path}/phpdox">
+
+    <collector publiconly="false">
+        ${phpdox.include}
+        ${phpdox.exclude}
+    </collector>
+
+    <!--  Configuration of generation process -->
+    <generator output="${phpqa.build.path}">
+
+      <enrich base="${phpqa.build.path}/logs">
+        <source type="build" />
+        <source type="phploc" />
+        <source type="git">
+          <history enabled="true" limit="15" />
+        </source>
+        <source type="checkstyle" />
+        <source type="pmd" />
+        <!-- source type="phpunit" / -->
+      </enrich>
+
+      <build engine="html" enabled="true" output="doc">
+        <file extension="html" />
+      </build>
+
+    </generator>
+  </project>
+
+</phpdox>

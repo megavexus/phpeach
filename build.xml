@@ -3,15 +3,16 @@
 <project name="QA artifacts builder" default="qa:build">
   <property file="build.ini" />
   <property file="build.ini.dist" />
+  <property file="${phing.dir}/build.ini.dist" />
 
   <target name="qa:build" description="Main build quality data and info for CI tools"
-      depends="qa:main:prepare,qa:check:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:doc:apigen,qa:ci:phpspec,qa:doc:phpdox" />
+      depends="qa:main:prepare,qa:check:lint,qa:ci:phploc,qa:check:pdepend,qa:ci:phpmd,qa:ci:phpcs,qa:check:phpcpd,qa:tests:phpspec,qa:tests:phpunit,qa:doc:phpdox" />
 
   <target name="qa:check" description="Pass main tools to verify quality of code"
       depends="qa:main:config,qa:check:lint,qa:check:phploc,qa:check:phpcs,qa:check:phpmd,qa:check:phpcpd,qa:tests:phpspec" />
 
-  <target name="qa:main:clean" description="Cleanup build artifacts">
-    <delete dir="${phpqa.build.path}/api" />
+  <target name="qa:main:clean" description="Cleanup build artifacts"
+      depends="qa:main:config" >
     <delete dir="${phpqa.build.path}/doc" />
     <delete dir="${phpqa.build.path}/coverage" />
     <delete dir="${phpqa.build.path}/logs" />
@@ -19,8 +20,7 @@
   </target>
 
   <target name="qa:main:prepare" description="Prepare for build"
-      depends="qa:main:config,qa:main:clean" >
-    <mkdir dir="${phpqa.build.path}/api" />
+      depends="qa:main:clean" >
     <mkdir dir="${phpqa.build.path}/doc" />
     <mkdir dir="${phpqa.build.path}/coverage" />
     <mkdir dir="${phpqa.build.path}/logs" />
@@ -32,11 +32,10 @@
     <!-- defaults -->
     <property name="vendors.path" value="${project.basedir}/vendor" />
     <property name="phpqa.tools.path" value="${vendors.path}/bin" />
-    <property name="phpqa.build.path" value="${project.basedir}/build" />
-    <property name="phpqa.source.path" value="${project.basedir}/src" />
+    <property name="phpqa.build.path" value="build" />
+    <property name="phpqa.source.path" value="src" />
     <property name="phpqa.source.suffix" value="php" />
     <property name="phpqa.exclude.path" value="" />
-    <property name="phpqa.tests.path" value="${project.basedir}/tests" />
     <property name="phpqa.source.list" value="" />
 
     <!-- create paths -->
@@ -68,22 +67,28 @@
   <target name="lint-path" hidden="true" >
     <echo>Checking ${lint.path}</echo>
 
-    <php function="str_replace" returnProperty="lint.include">
+    <php function="str_replace" returnProperty="lint.include" level="verbose">
       <param value=","/>
       <param value=",**.*"/>
       <param value="${phpqa.source.suffix}"/>
     </php>
-    <php function="str_replace" returnProperty="lint.exclude">
-      <param value=","/>
-      <param value="/**,**/"/>
-      <param value="${phpqa.exclude.path}"/>
-    </php>
-
+    
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <php function="str_replace" returnProperty="lint.exclude" level="verbose">
+          <param value=","/>
+          <param value="/**,**/"/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="lint.exclude" value="**/${lint.exclude}/**" override="true" />
+      </then>
+    </if>
+    
     <apply executable="php" checkreturn="true">
       <arg value="-l" />
-      <fileset dir="${lint.path}">
+      <fileset dir="${lint.path}" excludes="${lint.exclude}" >
         <include name="**/*${lint.include}" />
-        <exclude name="**/${lint.exclude}/**" />
       </fileset>
     </apply>
   </target>
@@ -91,53 +96,57 @@
   <target name="qa:check:phploc" depends="qa:main:config"
       description="Measure project size using PHPLOC">
 
-    <php function="str_replace" returnProperty="phploc.names">
+    <php function="str_replace" returnProperty="phploc.names" level="verbose">
       <param value=","/>
       <param value=",*"/>
       <param value="${phpqa.source.suffix}"/>
     </php>
 
+    <property name="phploc.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
-        <php function="str_replace" returnProperty="phploc.exclude">
+        <php function="str_replace" returnProperty="phploc.exclude" level="verbose">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
         </php>
+        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
       </then>
     </if>
 
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
-    <property name="command" value='${command} --names *${phploc.names} ${phploc.exclude}' override="true" />
+    <property name="command" value='${command} --names *${phploc.names}' override="true" />
     <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
-
+    
     <exec command='${command}' passthru="true" />
   </target>
 
   <target name="qa:ci:phploc" depends="qa:main:config"
       description="Measure project size using PHPLOC">
 
-    <php function="str_replace" returnProperty="phploc.names">
+    <php function="str_replace" returnProperty="phploc.names" level="verbose">
       <param value=","/>
       <param value=",*"/>
       <param value="${phpqa.source.suffix}"/>
     </php>
+
+    <property name="phploc.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
-        <php function="str_replace" returnProperty="phploc.exclude">
+        <php function="str_replace" returnProperty="phploc.exclude" level="verbose">
           <param value=","/>
           <param value=" --exclude "/>
           <param value="${phpqa.exclude.path}"/>
         </php>
+        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
       </then>
     </if>
 
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
+    <property name="command" value='${command} --names *${phploc.names}' override="true" />
     <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
     <property name="command" value='${command} --log-csv ${phpqa.build.path}/logs/phploc.csv' override="true" />
     <property name="command" value='${command} --log-xml ${phpqa.build.path}/logs/phploc.xml' override="true" />
@@ -148,49 +157,65 @@
 
   <target name="qa:check:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
+      
+    <property name="phpmd.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phpmd.exclude" value='--exclude ${phpqa.exclude.path}' override="true" />
+        <php function="str_replace" returnProperty="phpmd.exclude" level="verbose">
+          <param value=","/>
+          <param value="/,"/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="phpmd.exclude" value='--exclude ${phpmd.exclude}/' override="true" />
       </then>
     </if>
-
+    
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
-    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} text' override="true" />
     <property name="command" value='${command} ${phpqa.phpmd.ruleset}' override="true" />
+    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
 
     <exec command='${command}' passthru="true" />
+    
   </target>
 
   <target name="qa:ci:phpmd" depends="qa:main:config"
       description="Perform project mess detection using PHPMD creating a log file for the continuous integration server">
+      
+    <property name="phpmd.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <property name="phpmd.exclude" value='--exclude ${phpqa.exclude.path}' override="true" />
+        <php function="str_replace" returnProperty="phpmd.exclude" level="verbose">
+          <param value=","/>
+          <param value="/,"/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="phpmd.exclude" value='--exclude ${phpmd.exclude}/' override="true" />
       </then>
     </if>
 
     <property name="command" value='${phpqa.tools.path}/phpmd' override="true" />
-    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
     <property name="command" value='${command} xml' override="true" />
     <property name="command" value='${command} ${phpqa.phpmd.ruleset}' override="true" />
+    <property name="command" value='${command} ${phpmd.exclude}' override="true" />
     <property name="command" value='${command} --reportfile ${phpqa.build.path}/logs/pmd.xml' override="true" />
 
     <exec command='${command}' />
-
+    
   </target>
 
   <target name="qa:check:phpcs" depends="qa:main:config"
       description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
 
+    <property name="phpcs.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phpcs.exclude">
+        <php function="str_replace" returnProperty="phpcs.exclude" level="verbose">
           <param value=","/>
           <param value="/*,*/"/>
           <param value="${phpqa.exclude.path}"/>
@@ -211,10 +236,11 @@
   <target name="qa:ci:phpcs" depends="qa:main:config"
       description="Find coding standard violations using PHP_CodeSniffer creating a log file for the continuous integration server">
 
+    <property name="phpcs.exclude" value='' override="true" />
     <if>
       <istrue value="${phpqa.exclude.path}" />
       <then>
-        <php function="str_replace" returnProperty="phpcs.exclude">
+        <php function="str_replace" returnProperty="phpcs.exclude" level="verbose">
           <param value=","/>
           <param value="/*,*/"/>
           <param value="${phpqa.exclude.path}"/>
@@ -236,12 +262,31 @@
 
   <target name="qa:check:phpcpd" depends="qa:main:config"
       description="Find duplicate code using PHPCPD">
+
+    <php function="str_replace" returnProperty="phpcpd.names" level="verbose">
+      <param value=","/>
+      <param value=",*"/>
+      <param value="${phpqa.source.suffix}"/>
+    </php>
+      
+    <property name="phpcpd.exclude" value='' override="true" />
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <php function="str_replace" returnProperty="phpcpd.exclude" level="verbose">
+          <param value=","/>
+          <param value=" --exclude "/>
+          <param value="${phpqa.exclude.path}"/>
+        </php>
+        <property name="phpcpd.exclude" value='--exclude ${phpcpd.exclude}' override="true" />
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/phpcpd' override="true" />
-    <!-- property name="command" value='${command} __names ${phpqa.include.path}' override="true" />
-    <property name="command" value='${command} __names-exclude ${phpqa.exclude.path}' override="true" />
-    <property name="command" value='${command} __exclude ${phpqa.exclude.path}' override="true" /-->
+    <property name="command" value='${command} --names=*${phpcpd.names}' override="true" />
+    <property name="command" value='${command} ${phpcpd.exclude}' override="true" />
     <property name="command" value='${command} --log-pmd ${phpqa.build.path}/logs/pmd-cpd.xml' override="true" />
-    <property name="command" value='${command} ${phpqa.source}' override="true" />
+    <property name="command" value='${command} -n ${phpqa.source}' override="true" />
 
     <exec command='${command}' passthru="true" />
 
@@ -249,10 +294,21 @@
 
   <target name="qa:check:pdepend" depends="qa:main:config"
       description="Calculate software metrics using PHP_Depend">
+
+    <property name="pdepend.exclude" value='' override="true" />
+    <if>
+      <istrue value="${phpqa.exclude.path}" />
+      <then>
+        <property name="pdepend.exclude" value='--ignore=${phpqa.exclude.path}' override="true" />
+      </then>
+    </if>
+
     <property name="command" value='${phpqa.tools.path}/pdepend' override="true" />
     <property name="command" value='${command} --jdepend-xml=${phpqa.build.path}/logs/jdepend.xml' override="true" />
     <property name="command" value='${command} --jdepend-chart=${phpqa.build.path}/pdepend/dependencies.svg' override="true" />
     <property name="command" value='${command} --overview-pyramid=${phpqa.build.path}/pdepend/overview-pyramid.svg' override="true" />
+    <property name="command" value='${command} --suffix=${phpqa.source.suffix}' override="true" />
+    <property name="command" value='${command} ${pdepend.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source.list}' override="true" />
 
     <exec command='${command}' />
@@ -261,42 +317,117 @@
 
   <target name="qa:doc:phpdox" depends="qa:main:config"
       description="Generate API documentation using phpDox">
+
+    <available file="phpdox.xml.dist" property="phpdox.xml" value="true" />
+    
+    <if>
+        <not><isset property="phpdox.xml" /></not>
+        <then>
+            <php function="str_replace" returnProperty="phpdox.include" level="verbose" >
+              <param value="," />
+              <param value='" /&gt;&lt;include mask=".*' />
+              <param value="${phpqa.source.suffix}" />
+            </php>
+            <property name="phpdox.include" value='&lt;include mask="*.${phpdox.include}" /&gt;' override="true" />
+
+            <property name="phpdox.exclude" value='' override="true" />
+            <if>
+              <istrue value="${phpqa.exclude.path}" />
+              <then>
+                <php function="str_replace" returnProperty="phpdox.exclude" level="verbose">
+                  <param value="," />
+                  <param value='/*" /&gt;&lt;exclude mask="*/' />
+                  <param value="${phpqa.exclude.path}"/>
+                </php>
+                <property name="phpdox.exclude" value='&lt;exclude mask="*/${phpdox.exclude}/*" /&gt;' override="true" />
+              </then>
+            </if>
+
+            <copy file="${phing.dir}/phpdox.xml.dist" todir="${project.basedir}">
+                <filterchain>
+                    <expandproperties />
+                </filterchain>
+            </copy>
+        </then>
+    </if>
+      
     <exec executable='${phpqa.tools.path}/phpdox' passthru="true" />
+    
+    <if>
+        <not><isset property="phpdox.xml" /></not>
+        <then>
+            <delete file="phpdox.xml.dist" />
+        </then>
+    </if>
+    
   </target>
 
-  <target name="qa:tests:phpunit" depends="qa:main:config"
+  <target name="qa:tests:phpunit" depends="qa:main:config" unless="phpqa.phpspec.enabled"
       description="Run unit tests with PHPUnit">
+
     <property name="command" value='${phpqa.tools.path}/phpunit' override="true" />
     <property name="command" value='${command} --coverage-html build/coverage' override="true" />
     <property name="command" value='${command} --coverage-clover build/logs/clover.xml' override="true" />
     <property name="command" value='${command} --log-junit build/logs/junit.xml' override="true" />
     <property name="command" value='${command} --coverage-crap4j build/logs/crap4j.xml' override="true" />
     <property name="command" value='${command} --testdox-html build/coverage/testdox.html' override="true" />
+    <property name="command" value='${command} ${phpqa.phpunit.options}' override="true" />
 
     <exec command='${command}' passthru="true" />
 
   </target>
+  
+  <target name="qa:tests:phpspec:config" hidden="true">
+    <property name="phpspec.yml" value="" />
+    <if>    
+        <available file="phpspec.yml.dist" />
+        <then>
+            <loadfile property="phpspec.yml" file="${project.basedir}/phpspec.yml.dist" />
+        </then>
+    </if>      
+    <if>
+        <not><contains substring="extensions:" string="${phpspec.yml}" /></not>
+        <then>
+            <property name="phpspec.yml" value="${phpspec.yml}extensions:" override="true" />
+        </then>
+    </if>
+    
+    <echo file="${project.basedir}/phpspec-coverage.yml" >
+${phpspec.yml}
 
-  <target name="qa:tests:phpspec" depends="qa:main:config"
-      description="Run tests with PHPSpec">
-    <property name="command" value='${phpqa.tools.path}/phpspec' override="true" />
-    <property name="command" value='${command} run' override="true" />
-    <property name="command" value='${command} --no-interaction' override="true" />
+code_coverage:
+  whitelist: [${phpqa.source.path}]
+  blacklist: [spec,tests,vendor]
+  format: [html,clover]
+  output:
+    html: ${phpqa.build.path}/coverage
+    clover: ${phpqa.build.path}/logs/clover.xml
+    </echo>
 
-    <exec command='${command}' passthru="true" />
-
+    <reflexive file="${project.basedir}/phpspec-coverage.yml">
+        <filterchain>
+            <replaceregexp>
+                <regexp pattern="extensions:\s*(\n)" replace="extensions:\1  - PhpSpec\Extension\CodeCoverageExtension\1"/>
+                <regexp pattern="[ ]+(\-.*)" replace="  \1" />
+            </replaceregexp>
+        </filterchain>
+    </reflexive>
   </target>
 
-  <target name="qa:ci:phpspec" depends="qa:main:config"
+  <target name="qa:tests:phpspec" depends="qa:main:config,qa:tests:phpspec:config" if="phpqa.phpspec.enabled"
       description="Run tests with PHPSpec">
+
     <property name="command" value='${phpqa.tools.path}/phpspec' override="true" />
     <property name="command" value='${command} run' override="true" />
+    <property name="command" value='${command} -c phpspec-coverage.yml' override="true" />
     <property name="command" value='${command} --format=junit' override="true" />
     <property name="command" value='${command} --no-interaction' override="true" />
 
     <exec command='${command}' passthru="true" output="${phpqa.build.path}/logs/junit.xml" />
 
-    <!-- Eso es para quitar los mensajes que genera phpspec y que se añaden al fichero -->
+    <delete file="${project.basedir}/phpspec-coverage.yml" />
+    
+    <!-- Remove messages generated by phpspec at the end of file -->
     <reflexive file="${phpqa.build.path}/logs/junit.xml">
       <filterchain>
         <replaceregexp>
@@ -304,19 +435,6 @@
         </replaceregexp>
       </filterchain>
     </reflexive>
-  </target>
-
-  <target name="qa:doc:apigen" depends="qa:main:config"
-      description="Generate API documentation using ApiGen">
-    <property name="command" value='${phpqa.tools.path}/apigen generate' override="true" />
-    <property name="command" value='${command} --source=${phpqa.source.list}' override="true" />
-    <property name="command" value='${command} --destination=${phpqa.build.path}/api' override="true" />
-    <property name="command" value='${command} --title="API Doc"' override="true" />
-    <property name="command" value='${command} --tree --todo --quiet' override="true" />
-    <!-- property name="command" value='${command} __exclude */Resources/*' override="true" / -->
-
-    <exec command='${command}' passthru="true" />
-
   </target>
 
 </project>
