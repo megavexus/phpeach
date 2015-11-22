@@ -13,9 +13,10 @@ source ${SCRIPT_PATH}/phpeach.conf.dist && source ${PATH_PWD}/phpeach.conf 2> /d
 
 # Tools are under vendors deploy?
 if [[ "$PHPEACH_TOOLS_PATH" == "" ]]; then
-    PHPEACH_TOOLS_PATH=${SCRIPT_PATH}/vendor/bin/
+    PHPEACH_TOOLS_PATH=${PATH_PWD}/vendor/bin/
     PHPEACH_TOOLS_PATH=$([ -e ${PHPEACH_TOOLS_PATH}phpcs ] && echo ${PHPEACH_TOOLS_PATH})
-else
+fi
+if [[ "$PHPEACH_TOOLS_PATH" != "" ]]; then
     PHPEACH_TOOLS_PATH=${PHPEACH_TOOLS_PATH%/}/
 fi
 
