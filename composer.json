@@ -1,6 +1,7 @@
 {
     "name": "oxkhar/phpeach",
     "description": "Test & Quality tools",
+    "keywords": ["qa", "quality", "PHP", "development", "ci", "continous integration", "githooks"],
     "license": "MIT",
     "authors": [
         {
@@ -8,7 +9,7 @@
             "email": "hi@oxkhar.com"
         }
     ],
-    "bin": ["phpeach"],
+    "bin": ["phpeach", "pre-commit.phpeach"],
     "require": {
         "phing/phing": "~2.8",
 
