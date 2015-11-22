@@ -108,18 +108,18 @@
       <then>
         <php function="str_replace" returnProperty="phploc.exclude" level="verbose">
           <param value=","/>
-          <param value=" --exclude "/>
+          <param value=" --exclude="/>
           <param value="${phpqa.exclude.path}"/>
         </php>
-        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
+        <property name="phploc.exclude" value='--exclude=${phploc.exclude}' override="true" />
       </then>
     </if>
 
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
-    <property name="command" value='${command} --names *${phploc.names}' override="true" />
+    <property name="command" value='${command} --names=*${phploc.names}' override="true" />
     <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
-    
+
     <exec command='${command}' passthru="true" />
   </target>
 
@@ -138,18 +138,18 @@
       <then>
         <php function="str_replace" returnProperty="phploc.exclude" level="verbose">
           <param value=","/>
-          <param value=" --exclude "/>
+          <param value=" --exclude="/>
           <param value="${phpqa.exclude.path}"/>
         </php>
-        <property name="phploc.exclude" value='--exclude ${phploc.exclude}' override="true" />
+        <property name="phploc.exclude" value='--exclude=${phploc.exclude}' override="true" />
       </then>
     </if>
 
     <property name="command" value='${phpqa.tools.path}/phploc' override="true" />
-    <property name="command" value='${command} --names *${phploc.names}' override="true" />
+    <property name="command" value='${command} --names=*${phploc.names}' override="true" />
     <property name="command" value='${command} --count-tests ${phploc.exclude}' override="true" />
-    <property name="command" value='${command} --log-csv ${phpqa.build.path}/logs/phploc.csv' override="true" />
-    <property name="command" value='${command} --log-xml ${phpqa.build.path}/logs/phploc.xml' override="true" />
+    <property name="command" value='${command} --log-csv=${phpqa.build.path}/logs/phploc.csv' override="true" />
+    <property name="command" value='${command} --log-xml=${phpqa.build.path}/logs/phploc.xml' override="true" />
     <property name="command" value='${command} ${phpqa.source}' override="true" />
 
     <exec command='${command}' passthru="true" />
