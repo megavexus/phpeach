@@ -20,14 +20,20 @@ if [[ "$PHPEACH_TOOLS_PATH" != "" ]]; then
     PHPEACH_TOOLS_PATH=${PHPEACH_TOOLS_PATH%/}/
 fi
 
-if [[ "$1" == "-b" || "$1" == "--build" ]]
-then
+if [[ "$1" == "-b" || "$1" == "--build" ]]; then
     shift
 
     ${PHPEACH_TOOLS_PATH}/phing -f ${SCRIPT_PATH}/build.xml -Dproject.basedir=${PATH_PWD} -Dphpqa.tools.path=${PHPEACH_TOOLS_PATH} $*
-    $STATUS_CODE=$?
+    STATUS_CODE=$?
 
     exit $STATUS_CODE
+elif [[ "$1" == "-i" || "$1" == "--install" ]]; then
+    shift
+
+    [ ! -e ${PWD}/build.ini.dist ] && cp ${SCRIPT_PATH}/build.ini.dist ${PATH_PWD}
+    [ ! -e ${PWD}/phpeach.conf.dist ] && cp ${SCRIPT_PATH}/phpeach.conf.dist ${PATH_PWD}
+
+    exit 0
 fi
 
 # Initialize
