@@ -1,0 +1,13 @@
+checkstyle
+cloverphp
+crap4j
+dry
+htmlpublisher
+jdepend
+plot
+pmd
+violations
+warnings
+xunit
+php
+git
