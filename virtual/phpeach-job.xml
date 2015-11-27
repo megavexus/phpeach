@@ -14,7 +14,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>vendor/bin/phpeach -b</command>
+      <command>~/.composer/vendor/bin/phpeach -b</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
