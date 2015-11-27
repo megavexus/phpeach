@@ -9,7 +9,9 @@ INSTALL_PATH=$(dirname $(realpath -s $0))
 PHPEACH_TOOLS_PATH=$([ -e ${INSTALL_PATH}/phpcs ] && echo ${INSTALL_PATH}/)
 
 # Setup config, please...
-source ${SCRIPT_PATH}/phpeach.conf.dist && source ${PATH_PWD}/phpeach.conf 2> /dev/null
+source ${SCRIPT_PATH}/phpeach.conf.dist && \
+source ${PATH_PWD}/phpeach.conf.dist 2> /dev/null && \
+source ${PATH_PWD}/phpeach.conf 2> /dev/null
 
 # Tools are under vendors deploy?
 if [[ "$PHPEACH_TOOLS_PATH" == "" ]]; then
