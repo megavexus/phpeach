@@ -68,7 +68,7 @@ if check_is_ok && check_is_active FIXER; then
     echo -e "\nChecking code to fix..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        ${PHPEACH_TOOLS_PATH}php-cs-fixer fix --dry-run --fixers=${PHPEACH_CODE_FIXERS} ${PHP_SCRIPT} | grep -iv "fixed all files"
+        ${PHPEACH_TOOLS_PATH}php-cs-fixer fix --dry-run ${PHPEACH_FIXER_OPTIONS} ${PHP_SCRIPT} | grep -iv "fixed all files"
         if [ ${PIPESTATUS[0]} -ne 0 ]; then
             check_failed 2
         else
@@ -77,7 +77,7 @@ if check_is_ok && check_is_active FIXER; then
     done
     if ! check_is_ok; then
         echo -e "\nRun this command for each file to fix it..."
-        echo -e ${PHPEACH_TOOLS_PATH}php-cs-fixer fix --fixers=${PHPEACH_CODE_FIXERS} "<file>\n"
+        echo -e ${PHPEACH_TOOLS_PATH}php-cs-fixer fix ${PHPEACH_FIXER_OPTIONS} "<file>\n"
     fi
 fi
 
@@ -86,7 +86,7 @@ if check_is_ok && check_is_active PSR; then
     echo -e "\nChecking code style..."
 
     for PHP_SCRIPT in $LIST_FILES; do
-        if ! ${PHPEACH_TOOLS_PATH}phpcs ${PHPEACH_CS_OPTS} --standard=${PHPEACH_CODE_STANDARD} ${PHP_SCRIPT}; then
+        if ! ${PHPEACH_TOOLS_PATH}phpcs ${PHPEACH_CS_OPTIONS} --standard=${PHPEACH_CODE_STANDARD} ${PHP_SCRIPT}; then
             check_failed 4
         fi
     done
